@@ -1,0 +1,281 @@
+// Mohan E-Commerce Store — Prisma Schema
+// Works with SQLite (local dev) and PostgreSQL (production on Neon)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────
+// SQLite doesn't support enums, so we use String fields with constants.
+
+// Role: "CUSTOMER" | "ADMIN"
+// OrderStatus: "PLACED" | "CONFIRMED" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "RETURNED"
+// PaymentMode: "RAZORPAY" | "COD"
+// PaymentStatus: "PENDING" | "PAID" | "FAILED" | "REFUNDED"
+// CouponType: "FLAT" | "PERCENT"
+
+// ─── Models ─────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String?
+  image         String?
+  role          String    @default("CUSTOMER") // CUSTOMER | ADMIN
+  phone         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses     Address[]
+  orders        Order[]
+  reviews       Review[]
+  cartItems     CartItem[]
+  wishlistItems WishlistItem[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model Address {
+  id          String  @id @default(cuid())
+  userId      String
+  name        String
+  phone       String
+  line1       String
+  line2       String?
+  city        String
+  state       String
+  pincode     String
+  country     String  @default("IN")
+  isDefault   Boolean @default(false)
+
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders      Order[]
+
+  @@index([userId])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  image     String?
+  parentId  String?
+  parent    Category? @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[] @relation("CategoryTree")
+  sortOrder Int       @default(0)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  products  CategoryProduct[]
+
+  @@index([slug])
+  @@index([parentId])
+}
+
+model CategoryProduct {
+  productId  String
+  categoryId String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([categoryId])
+}
+
+model Product {
+  id              String    @id @default(cuid())
+  title           String
+  slug            String    @unique
+  description     String
+  mrp             Int       // in paise (₹ * 100)
+  price           Int       // selling price in paise
+  discountPercent Int       @default(0)
+  stock           Int       @default(0)
+  sku             String?
+  isActive        Boolean   @default(true)
+  isFeatured      Boolean   @default(false)
+  isDealOfTheDay  Boolean   @default(false)
+  weight          Float?
+  tags            String    @default("[]")   // JSON array stored as string for SQLite
+  images          String    @default("[]")   // JSON array stored as string for SQLite
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  variants        Variant[]
+  orderItems      OrderItem[]
+  reviews         Review[]
+  cartItems       CartItem[]
+  wishlistItems   WishlistItem[]
+  categoryProducts CategoryProduct[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([isFeatured])
+  @@index([isDealOfTheDay])
+  @@index([price])
+  @@index([createdAt])
+}
+
+model Variant {
+  id        String   @id @default(cuid())
+  productId String
+  size      String?
+  color     String?
+  colorCode String?
+  sku       String?
+  price     Int?
+  stock     Int      @default(0)
+  image     String?
+
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  userId             String
+  addressId          String
+  orderNumber        String      @unique
+  status             String      @default("PLACED")   // PLACED|CONFIRMED|SHIPPED|DELIVERED|CANCELLED|RETURNED
+  paymentMode        String                               // RAZORPAY|COD
+  paymentStatus      String      @default("PENDING")     // PENDING|PAID|FAILED|REFUNDED
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+  subtotal           Int         // in paise
+  discount           Int         @default(0)
+  shippingCharges    Int         @default(0)
+  total              Int         // in paise
+  couponCode         String?
+  notes              String?
+  cancelReason       String?
+  shippedAt          DateTime?
+  deliveredAt        DateTime?
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+
+  user               User        @relation(fields: [userId], references: [id])
+  address            Address     @relation(fields: [addressId], references: [id])
+  items              OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([orderNumber])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id               String   @id @default(cuid())
+  orderId          String
+  productId        String
+  variantId        String?
+  title            String
+  image            String?
+  size             String?
+  color            String?
+  mrp              Int
+  priceAtPurchase  Int
+  discountAtPurchase Int  @default(0)
+  quantity         Int      @default(1)
+  total            Int
+
+  order            Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product  @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model Coupon {
+  id          String     @id @default(cuid())
+  code        String     @unique
+  type        String                             // FLAT | PERCENT
+  value       Int        // flat amount in paise OR percent (0-100)
+  minOrder    Int        @default(0)
+  maxDiscount Int?
+  expiry      DateTime
+  usageLimit  Int?
+  usedCount   Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@index([expiry])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  rating    Int
+  title     String?
+  comment   String?
+  images    String   @default("[]") // JSON array for SQLite
+  isVerified Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@index([rating])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  variantId String?
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId, variantId])
+  @@index([userId])
+}
+
+model WishlistItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model StoreSetting {
+  id                   String  @id @default("singleton")
+  storeName            String  @default("Mohan")
+  storeDescription     String?
+  announcementText     String?
+  announcementActive   Boolean @default(false)
+  heroImages           String  @default("[]") // JSON array for SQLite
+  whatsappNumber       String?
+  instagramHandle      String?
+  freeShippingThreshold Int  @default(49900) // ₹499 in paise
+  defaultPincode       String?
+  email                String?
+  phone                String?
+  razorpayKeyId        String?
+  razorpayKeySecret    String?
+  updatedAt            DateTime @updatedAt
+}
