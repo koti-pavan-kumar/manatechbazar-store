@@ -1,12 +1,13 @@
-// Mohan E-Commerce Store — Prisma Schema
-// Works with SQLite (local dev) and PostgreSQL (production on Neon)
+// Mana Tech Bazar — E-Commerce Store Prisma Schema
+// PostgreSQL for production (Neon), SQLite for local dev
+// To switch back locally: change provider to "sqlite"
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
