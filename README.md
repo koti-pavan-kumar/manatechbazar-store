@@ -282,3 +282,4 @@ npm run setup        # Install + push + seed (one command)
 
 MIT
 
+Deploy: Mon Sep 14 21:08:02 IST 2026
