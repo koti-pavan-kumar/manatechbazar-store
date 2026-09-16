@@ -6,9 +6,12 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Use next-auth's getToken which can decrypt JWE tokens
+  // On HTTPS (Vercel), cookies are prefixed with __Secure-
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
+    secureCookie: true,
+    cookieName: "__Secure-authjs.session-token",
   });
 
   // Admin routes require ADMIN role
