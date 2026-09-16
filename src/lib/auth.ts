@@ -50,6 +50,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: {
     strategy: "jwt",
   },
+  jwt: {
+    // Disable JWT encryption so Edge middleware can decode the token
+    encryption: false,
+  },
   pages: {
     signIn: "/login",
   },
