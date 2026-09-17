@@ -60,7 +60,7 @@ export async function sendVerificationCode(
         : "Reset your password — Mana Tech Bazar";
 
     await resend.emails.send({
-      from: "Mana Tech Bazar <noreply@manatechbazar.in>",
+      from: "Mana Tech Bazar <onboarding@resend.dev>",
       to: email,
       subject,
       html: `
