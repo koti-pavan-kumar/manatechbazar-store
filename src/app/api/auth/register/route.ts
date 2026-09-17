@@ -2,15 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
+import { isEmailVerified } from "@/lib/verification";
 import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
-  // Rate limit: 3 registrations per IP per hour
+  // Rate limit: 5 registrations per IP per hour
   const ip = getClientIp(req);
   const rl = rateLimit(ip, {
     key: "register",
-    maxRequests: 3,
-    windowMs: 60 * 60 * 1000, // 1 hour
+    maxRequests: 5,
+    windowMs: 60 * 60 * 1000,
   });
 
   if (!rl.allowed) {
@@ -29,6 +30,15 @@ export async function POST(req: NextRequest) {
     }
 
     const { name, email, password } = parsed.data;
+
+    // Check if email is verified before creating account
+    const verified = await isEmailVerified(email, "REGISTER");
+    if (!verified) {
+      return NextResponse.json(
+        { error: "Please verify your email before creating an account" },
+        { status: 400 }
+      );
+    }
 
     // Check existing user
     const existing = await db.user.findUnique({ where: { email } });

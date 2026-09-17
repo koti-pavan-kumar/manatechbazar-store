@@ -280,3 +280,16 @@ model StoreSetting {
   razorpayKeySecret    String?
   updatedAt            DateTime @updatedAt
 }
+
+model VerificationCode {
+  id        String   @id @default(cuid())
+  email     String
+  code      String
+  type      String   @default("REGISTER") // REGISTER | LOGIN | RESET_PASSWORD
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([email, type])
+  @@index([expiresAt])
+}
