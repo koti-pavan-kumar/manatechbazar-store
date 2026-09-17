@@ -47,8 +47,8 @@ export async function sendVerificationCode(
 
   // Send email via Resend
   if (!resend) {
-    console.log(`📧 Verification code for ${email}: ${code} (RESEND_API_KEY not configured)`);
-    return { success: true, message: "Verification code sent!", code };
+    console.log(`📧 Verification code for ${email}: ${code} (RESEND_API_KEY not configured — add it to Vercel env vars to send real emails)`);
+    return { success: true, message: "Verification code sent!" };
   }
 
   try {
@@ -121,8 +121,7 @@ export async function sendVerificationCode(
     return { success: true, message: "Verification code sent to your email!" };
   } catch (error) {
     console.error("Failed to send verification email:", error);
-    // Still return success with the code so dev/testing works
-    return { success: true, message: "Verification code sent!", code };
+    return { success: true, message: "Verification code sent!" };
   }
 }
 
