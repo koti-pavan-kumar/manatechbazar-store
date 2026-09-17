@@ -37,7 +37,7 @@ export async function sendOrderConfirmation(data: OrderEmailData) {
       .join("");
 
     await resend.emails.send({
-      from: "Mana Tech Bazar <onboarding@resend.dev>",
+      from: "Mana Tech Bazar <noreply@manatechbazar.in>",
       to: data.customerEmail,
       subject: `Order Confirmed #${data.orderNumber} 🎉`,
       html: `
