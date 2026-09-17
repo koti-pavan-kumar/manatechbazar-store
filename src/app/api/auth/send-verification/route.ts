@@ -3,12 +3,12 @@ import { sendVerificationCode } from "@/lib/verification";
 import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: Request) {
-  // Rate limit: 3 requests per IP per 15 minutes
+  // Rate limit: 5 requests per IP per 10 minutes
   const ip = getClientIp(req as any);
   const rl = rateLimit(ip, {
     key: "send-verification",
-    maxRequests: 5,
-    windowMs: 15 * 60 * 1000,
+    maxRequests: 10,
+    windowMs: 10 * 60 * 1000,
   });
 
   if (!rl.allowed) {

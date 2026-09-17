@@ -15,16 +15,16 @@ export async function sendVerificationCode(
   email: string,
   type: "REGISTER" | "LOGIN" | "RESET_PASSWORD" = "REGISTER"
 ): Promise<{ success: boolean; message: string; code?: string }> {
-  // Rate limit: max 3 codes per email per 15 minutes
+  // Rate limit: max 5 codes per email per 10 minutes
   const recentCodes = await db.verificationCode.count({
     where: {
       email,
       type,
-      createdAt: { gte: new Date(Date.now() - 15 * 60 * 1000) },
+      createdAt: { gte: new Date(Date.now() - 10 * 60 * 1000) },
     },
   });
 
-  if (recentCodes >= 3) {
+  if (recentCodes >= 5) {
     return {
       success: false,
       message: "Too many attempts. Please wait 15 minutes and try again.",
