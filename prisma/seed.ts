@@ -83,7 +83,7 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // ─── Admin User ──────────────────────────────────────────
-  const adminPassword = await bcrypt.hash("admin123", 12);
+  const adminPassword = await bcrypt.hash("Admin@2026!", 12);
   const admin = await prisma.user.upsert({
     where: { email: "admin@manatechbazar.in" },
     update: {},
@@ -95,10 +95,10 @@ async function main() {
       phone: "919999999999",
     },
   });
-  console.log("✅ Admin user created:", admin.email, "/ admin123");
+  console.log("✅ Admin user created:", admin.email, "/ Admin@2026!");
 
   // ─── Demo Customer ───────────────────────────────────────
-  const customerPassword = await bcrypt.hash("customer123", 12);
+  const customerPassword = await bcrypt.hash("Shop@2026!", 12);
   const customer = await prisma.user.upsert({
     where: { email: "demo@example.com" },
     update: {},
@@ -109,7 +109,7 @@ async function main() {
       role: "CUSTOMER",
     },
   });
-  console.log("✅ Demo customer:", customer.email, "/ customer123");
+  console.log("✅ Demo customer:", customer.email, "/ Shop@2026!");
 
   // ─── Categories ──────────────────────────────────────────
   const categoryData = [
@@ -342,8 +342,8 @@ async function main() {
   console.log("✅ Store settings created");
 
   console.log("\n🎉 Seed complete!");
-  console.log("   Admin login: admin@manatechbazar.in / admin123");
-  console.log("   Customer login: demo@example.com / customer123");
+  console.log("   Admin login: admin@manatechbazar.in / Admin@2026!");
+  console.log("   Customer login: demo@example.com / Shop@2026!");
 }
 
 main()
