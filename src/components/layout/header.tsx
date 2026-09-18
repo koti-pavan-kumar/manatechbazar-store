@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, User, Menu } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, Heart } from "lucide-react";
 import { Instagram } from "@/components/ui/icon-instagram";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCartStore } from "@/stores/cart";
+import { useWishlistStore } from "@/stores/wishlist";
 import { useState } from "react";
 
 export function Header() {
   const totalItems = useCartStore((s) => s.getTotalItems());
+  const wishlistCount = useWishlistStore((s) => s.items.length);
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -55,6 +57,9 @@ export function Header() {
           <Link href="/offers" className="text-sm font-medium hover:text-primary transition-colors text-orange-600">
             Offers
           </Link>
+          <Link href="/wishlist" className="text-sm font-medium hover:text-primary transition-colors">
+            Wishlist
+          </Link>
         </nav>
 
         {/* Spacer */}
@@ -73,6 +78,17 @@ export function Header() {
           <Link href="/account" aria-label="Account">
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
+            </Button>
+          </Link>
+
+          <Link href="/wishlist" aria-label="Wishlist" className="relative">
+            <Button variant="ghost" size="icon">
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-pink-500 text-white text-xs flex items-center justify-center font-bold">
+                  {wishlistCount > 99 ? "99+" : wishlistCount}
+                </span>
+              )}
             </Button>
           </Link>
 
@@ -98,6 +114,9 @@ export function Header() {
             </Link>
             <Link href="/offers" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center text-orange-600" onClick={() => setMobileMenuOpen(false)}>
               Offers & Deals
+            </Link>
+            <Link href="/wishlist" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
+              ❤️ My Wishlist
             </Link>
             <Link href="/account" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
               My Account
