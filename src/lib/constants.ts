@@ -6,7 +6,7 @@ export const STORE = {
   currency: "INR",
   currencySymbol: "₹",
   minOrderForFreeShipping: 499, // ₹499
-  whatsappNumber: "919999999999",
+  whatsappNumber: "917893653255",
   instagramHandle: "@manatechbazar",
   instagramUrl: "https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==",
   supportEmail: "support@manatechbazar.in",

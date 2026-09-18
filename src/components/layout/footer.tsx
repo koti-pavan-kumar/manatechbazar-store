@@ -52,8 +52,8 @@ export function Footer() {
             <h3 className="font-bold text-sm mb-3">Contact</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="https://wa.me/919999999999" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
-                  📱 WhatsApp: +91 99999 99999
+                <a href="https://wa.me/917893653255" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">
+                  📱 WhatsApp: +91 78936 53255
                 </a>
               </li>
               <li>

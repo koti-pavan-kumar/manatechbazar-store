@@ -16,7 +16,7 @@ export default function ContactPage() {
     e.preventDefault();
     // Open WhatsApp with pre-filled message
     const text = `Hi, I have a query:\n\nName: ${name}\nEmail: ${email}\nSubject: ${subject}\n\n${message}`;
-    window.open(`https://wa.me/919999999999?text=${encodeURIComponent(text)}`, "_blank");
+    window.open(`https://wa.me/917893653255?text=${encodeURIComponent(text)}`, "_blank");
   };
 
   return (
@@ -33,7 +33,7 @@ export default function ContactPage() {
           {/* Contact Info Cards */}
           <div className="space-y-4">
             <a
-              href="https://wa.me/919999999999"
+              href="https://wa.me/917893653255"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-100 dark:border-green-900/30 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
@@ -43,7 +43,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <p className="font-bold">WhatsApp</p>
-                <p className="text-sm text-muted-foreground">+91 99999 99999</p>
+                <p className="text-sm text-muted-foreground">+91 78936 53255</p>
                 <p className="text-xs text-green-600 dark:text-green-400 font-medium">Usually replies in minutes</p>
               </div>
             </a>

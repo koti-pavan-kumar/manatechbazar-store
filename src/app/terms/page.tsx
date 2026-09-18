@@ -100,7 +100,7 @@ export default function TermsPage() {
               <p className="font-semibold mb-2">Mana Tech Bazar</p>
               <p className="text-sm text-muted-foreground space-y-1">
                 📧 Email: <a href="mailto:support@manatechbazar.in" className="text-primary hover:underline">support@manatechbazar.in</a><br />
-                📱 WhatsApp: <a href="https://wa.me/919999999999" className="text-primary hover:underline">+91 99999 99999</a><br />
+                📱 WhatsApp: <a href="https://wa.me/917893653255" className="text-primary hover:underline">+91 78936 53255</a><br />
                 🌐 Website: <a href="https://manatechbazar.in" className="text-primary hover:underline">manatechbazar.in</a>
               </p>
             </div>

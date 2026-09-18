@@ -35,7 +35,7 @@ export default function RefundPolicyPage() {
               <li>You may request a return within <strong>7 days</strong> of receiving the product.</li>
               <li>The product must be unused, unwashed, and in its original packaging with all tags attached.</li>
               <li>The following items are <strong>non-returnable</strong>: innerwear, socks, products purchased during final sale events, and customised items.</li>
-              <li>To initiate a return, contact us on WhatsApp at <strong>+91 99999 99999</strong> or email <strong>support@manatechbazar.in</strong> with your order ID and reason for return.</li>
+              <li>To initiate a return, contact us on WhatsApp at <strong>+91 78936 53255</strong> or email <strong>support@manatechbazar.in</strong> with your order ID and reason for return.</li>
             </ul>
           </section>
 
@@ -73,7 +73,7 @@ export default function RefundPolicyPage() {
               <p className="font-semibold mb-2">Mana Tech Bazar</p>
               <p className="text-sm text-muted-foreground space-y-1">
                 📧 Email: <a href="mailto:support@manatechbazar.in" className="text-primary hover:underline">support@manatechbazar.in</a><br />
-                📱 WhatsApp: <a href="https://wa.me/919999999999" className="text-primary hover:underline">+91 99999 99999</a><br />
+                📱 WhatsApp: <a href="https://wa.me/917893653255" className="text-primary hover:underline">+91 78936 53255</a><br />
                 🌐 Website: <a href="https://manatechbazar.in" className="text-primary hover:underline">manatechbazar.in</a>
               </p>
             </div>

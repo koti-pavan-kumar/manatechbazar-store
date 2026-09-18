@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
         <CardContent className="space-y-4">
           <div>
             <Label>WhatsApp Number (with country code)</Label>
-            <Input value={settings.whatsappNumber || ""} onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })} placeholder="919999999999" />
+            <Input value={settings.whatsappNumber || ""} onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })} placeholder="917893653255" />
           </div>
           <div>
             <Label>Instagram Handle</Label>

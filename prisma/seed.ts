@@ -90,14 +90,14 @@ async function main() {
       passwordHash: adminPassword,
       name: "Admin",
       role: "ADMIN",
-      phone: "919999999999",
+      phone: "917893653255",
     },
     create: {
       name: "Admin",
       email: "admin@manatechbazar.in",
       passwordHash: adminPassword,
       role: "ADMIN",
-      phone: "919999999999",
+      phone: "917893653255",
     },
   });
   console.log("✅ Admin user created:", admin.email, "/ Admin@2026!");
@@ -340,7 +340,7 @@ async function main() {
       storeDescription: "Your favourite store on Instagram",
       announcementText: "🔥 FLAT 20% OFF on first order — Use code WELCOME20 🔥",
       announcementActive: true,
-      whatsappNumber: "919999999999",
+      whatsappNumber: "917893653255",
       instagramHandle: "@manatechbazar",
       freeShippingThreshold: 499 * 100,
       email: "support@manatechbazar.in",

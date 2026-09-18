@@ -84,7 +84,7 @@ export function ProductDetailContent({ product, related }: Props) {
   };
 
   const whatsappMessage = `Hi! I'm interested in ${product.title} at ${formatPrice(currentPrice)}. Can you share more details?`;
-  const whatsappUrl = `https://wa.me/919999999999?text=${encodeURIComponent(whatsappMessage)}`;
+  const whatsappUrl = `https://wa.me/917893653255?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Admin handlers
   const handleDelete = async () => {

@@ -442,7 +442,7 @@ export function HomeContent({ data }: { data: HomeData }) {
                   Join our WhatsApp community for instant updates on new arrivals, exclusive deals, and styling tips!
                 </p>
                 <a
-                  href="https://wa.me/919999999999?text=Hi!%20I%20want%20to%20join%20your%20updates"
+                  href="https://wa.me/917893653255?text=Hi!%20I%20want%20to%20join%20your%20updates"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
