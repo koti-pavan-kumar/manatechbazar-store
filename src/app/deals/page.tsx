@@ -1,19 +1,13 @@
 import { db } from "@/lib/prisma";
-import { notFound } from "next/navigation";
 import { DealsContent } from "./deals-content";
 
 interface Props {
-  params: Promise<{ price: string }>;
+  searchParams: Promise<{ max?: string }>;
 }
 
 export default async function DealsPage(props: Props) {
-  const { price } = await props.params;
-  const maxPrice = parseInt(price);
-
-  if (!maxPrice || ![199, 499, 999].includes(maxPrice)) {
-    notFound();
-  }
-
+  const { max } = await props.searchParams;
+  const maxPrice = parseInt(max || "199");
   const maxPricePaise = maxPrice * 100;
 
   const [products, categories] = await Promise.all([
@@ -48,7 +42,7 @@ export default async function DealsPage(props: Props) {
       products={JSON.parse(JSON.stringify(products))}
       categories={JSON.parse(JSON.stringify(filteredCategories))}
       maxPrice={maxPrice}
-      priceKey={price}
+      priceKey={String(maxPrice)}
     />
   );
 }
