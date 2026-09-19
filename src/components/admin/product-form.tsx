@@ -190,6 +190,8 @@ export function ProductForm({ product, categories, mode }: Props) {
                 <span className="text-sm">{uploading ? "Uploading..." : "Add Images"}</span>
                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
               </label>
+              {errors.images && <p className="text-xs text-red-500 mt-1">{errors.images.message as string}</p>}
+              {images.length === 0 && !errors.images && <p className="text-xs text-amber-500 mt-1">⚠️ At least one image is required</p>}
             </CardContent>
           </Card>
 
@@ -212,6 +214,8 @@ export function ProductForm({ product, categories, mode }: Props) {
                   <span className="text-sm">{cat.name}</span>
                 </label>
               ))}
+              {errors.categoryIds && <p className="text-xs text-red-500 mt-1">{errors.categoryIds.message as string}</p>}
+              {selectedCategoryIds.length === 0 && !errors.categoryIds && <p className="text-xs text-amber-500 mt-1">⚠️ Select at least one category</p>}
             </CardContent>
           </Card>
 
@@ -243,6 +247,20 @@ export function ProductForm({ product, categories, mode }: Props) {
             </CardContent>
           </Card>
 
+          {Object.keys(errors).length > 0 && (
+            <div className="p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800">
+              <p className="text-sm font-medium text-red-600 dark:text-red-400">⚠️ Please fix these errors:</p>
+              <ul className="mt-1 text-xs text-red-500 space-y-0.5">
+                {errors.title && <li>• Title is required</li>}
+                {errors.description && <li>• Description must be at least 10 characters</li>}
+                {errors.mrp && <li>• MRP must be greater than 0</li>}
+                {errors.price && <li>• {errors.price.message}</li>}
+                {errors.stock && <li>• Stock cannot be negative</li>}
+                {errors.images && <li>• Upload at least one image</li>}
+                {errors.categoryIds && <li>• Select at least one category</li>}
+              </ul>
+            </div>
+          )}
           <Button type="submit" size="lg" className="w-full" disabled={loading}>
             {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {mode === "create" ? "Create Product" : "Save Changes"}
