@@ -29,6 +29,7 @@ export const productSchema = z.object({
   isActive: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   isDealOfTheDay: z.boolean().default(false),
+  freeShipping: z.boolean().default(false),
   categoryIds: z.array(z.string()).min(1, "Select at least one category"),
   tags: z.string().optional(),
   images: z.array(z.string()).min(1, "Upload at least one image"),
