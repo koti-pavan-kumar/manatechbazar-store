@@ -132,8 +132,9 @@ export async function POST(req: NextRequest) {
       );
       const data = await res.json();
       if (data.url) {
+        const secureUrl = data.url.replace("http://", "https://");
         return NextResponse.json({
-          url: data.url,
+          url: secureUrl,
           publicId: data.public_id,
           width: data.width,
           height: data.height,
