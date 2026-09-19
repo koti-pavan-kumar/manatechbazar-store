@@ -69,6 +69,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       mrp: product.mrp,
       image: imageUrl,
       stock: product.stock,
+      freeShipping: product.freeShipping,
     });
   };
 

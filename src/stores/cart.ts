@@ -12,6 +12,7 @@ export interface CartProduct {
   mrp: number;
   image: string;
   stock: number;
+  freeShipping?: boolean;
   variantId?: string;
   variantLabel?: string;
   quantity: number;

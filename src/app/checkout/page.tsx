@@ -36,7 +36,8 @@ export default function CheckoutPage() {
   const [showNewAddress, setShowNewAddress] = useState(false);
 
   const subtotal = getSubtotal();
-  const shipping = subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
+  const hasFreeShippingItem = items.some((item) => item.freeShipping);
+  const shipping = hasFreeShippingItem || subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
   const total = Math.max(0, subtotal - discount + shipping);
 
   const newAddressForm = useForm({

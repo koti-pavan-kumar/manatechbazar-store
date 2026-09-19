@@ -102,7 +102,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const shipping = subtotal >= 49900 ? 0 : 4900; // ₹499 threshold, ₹49 shipping
+    // Check if any item has free shipping
+    const hasFreeShipping = processedItems.some((item: any) => {
+      const product = orderItems.find((oi: any) => oi.id === item.productId);
+      return product?.freeShipping;
+    });
+    const shipping = hasFreeShipping || subtotal >= 49900 ? 0 : 4900; // Free if product has freeShipping or subtotal >= ₹499
     const total = Math.max(1, subtotal - couponDiscount + shipping); // Min ₹1
 
     // Check stock

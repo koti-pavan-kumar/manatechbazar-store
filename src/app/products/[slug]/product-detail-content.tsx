@@ -65,6 +65,7 @@ export function ProductDetailContent({ product, related }: Props) {
       mrp: product.mrp,
       image: images[0] || "",
       stock: currentStock,
+      freeShipping: product.freeShipping,
       variantId: selectedVariant?.id,
       variantLabel: selectedVariant
         ? [selectedVariant.size, selectedVariant.color].filter(Boolean).join(" / ")
