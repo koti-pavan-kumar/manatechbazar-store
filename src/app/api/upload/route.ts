@@ -119,26 +119,12 @@ export async function POST(req: NextRequest) {
     }
 
     // ─── Upload to Cloudinary ──────────────────────────────
-    if (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY) {
-      const timestamp = Math.round(Date.now() / 1000);
+    if (process.env.CLOUDINARY_CLOUD_NAME) {
       const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-
-      const crypto = await import("crypto");
-      const signature = crypto.default
-        .createHash("sha1")
-        .update(`timestamp=${timestamp}${process.env.CLOUDINARY_API_SECRET}`)
-        .digest("hex");
 
       const uploadFormData = new FormData();
       uploadFormData.append("file", file);
       uploadFormData.append("upload_preset", "unsigned_mohan");
-      uploadFormData.append("timestamp", String(timestamp));
-      uploadFormData.append("api_key", process.env.CLOUDINARY_API_KEY);
-      uploadFormData.append("signature", signature);
-
-      // Request auto-optimization
-      uploadFormData.append("quality", "auto");
-      uploadFormData.append("fetch_format", "auto");
 
       const res = await fetch(
         `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
@@ -154,6 +140,7 @@ export async function POST(req: NextRequest) {
           format: data.format,
         });
       }
+      console.error("Cloudinary upload error:", data);
     }
 
     // ─── Fallback: Save locally (dev only) ─────────────────
