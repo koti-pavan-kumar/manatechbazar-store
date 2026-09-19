@@ -48,17 +48,20 @@ export function Header() {
           <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">
             Shop
           </Link>
-          <Link href="/category/t-shirts" className="text-sm font-medium hover:text-primary transition-colors">
-            T-Shirts
+          <Link href="/category/gadgets" className="text-sm font-medium hover:text-primary transition-colors">
+            Gadgets
           </Link>
-          <Link href="/category/accessories" className="text-sm font-medium hover:text-primary transition-colors">
-            Accessories
+          <Link href="/category/home-kitchen" className="text-sm font-medium hover:text-primary transition-colors">
+            Kitchen
+          </Link>
+          <Link href="/category/jewellery" className="text-sm font-medium hover:text-primary transition-colors">
+            Jewellery
+          </Link>
+          <Link href="/category/toys-games" className="text-sm font-medium hover:text-primary transition-colors">
+            Toys
           </Link>
           <Link href="/offers" className="text-sm font-medium hover:text-primary transition-colors text-orange-600">
             Offers
-          </Link>
-          <Link href="/wishlist" className="text-sm font-medium hover:text-primary transition-colors">
-            Wishlist
           </Link>
         </nav>
 
