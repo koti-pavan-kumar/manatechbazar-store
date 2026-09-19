@@ -22,6 +22,7 @@ interface ProductCardProps {
     images: string;
     stock: number;
     isActive: boolean;
+    freeShipping?: boolean;
   };
   priority?: boolean;
 }
@@ -112,6 +113,13 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {discount > 0 && (
           <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-orange-500 text-white border-0 shadow-lg shadow-red-500/20 text-xs font-bold px-2.5 py-1">
             {discount}% OFF
+          </Badge>
+        )}
+
+        {/* Free Shipping badge */}
+        {product.freeShipping && (
+          <Badge className="absolute top-3 right-12 bg-green-500 text-white border-0 shadow-lg text-[10px] font-bold px-2 py-0.5">
+            🚚 FREE
           </Badge>
         )}
 

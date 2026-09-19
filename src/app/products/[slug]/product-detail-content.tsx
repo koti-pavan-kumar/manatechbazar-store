@@ -407,13 +407,24 @@ export function ProductDetailContent({ product, related }: Props) {
             </p>
           </div>
 
+          {/* Free Shipping Badge */}
+          {product.freeShipping && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
+              <Truck className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="text-xs font-bold text-green-700 dark:text-green-400">🚚 FREE Delivery on this product!</p>
+                <p className="text-[10px] text-green-600 dark:text-green-500">No shipping charges</p>
+              </div>
+            </div>
+          )}
+
           {/* Trust Signals */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
               <Truck className="h-5 w-5 text-green-600" />
               <div>
-                <p className="text-xs font-medium">Free Delivery</p>
-                <p className="text-[10px] text-muted-foreground">Above ₹499</p>
+                <p className="text-xs font-medium">{product.freeShipping ? "Free Delivery" : "Delivery"}</p>
+                <p className="text-[10px] text-muted-foreground">{product.freeShipping ? "Included" : "Above ₹499"}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">

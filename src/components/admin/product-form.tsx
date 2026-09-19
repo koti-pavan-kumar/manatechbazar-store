@@ -40,9 +40,9 @@ export function ProductForm({ product, categories, mode }: Props) {
       price: product?.price ? product.price / 100 : 0,
       stock: product?.stock || 0,
       sku: product?.sku || "",
-      isActive: product?.isActive ?? true,
-      isFeatured: product?.isFeatured ?? false,
-      isDealOfTheDay: product?.isDealOfTheDay ?? false,
+      isActive: product?.isActive ?? true,              isFeatured: product?.isFeatured ?? false,
+              isDealOfTheDay: product?.isDealOfTheDay ?? false,
+              freeShipping: product?.freeShipping ?? false,
       categoryIds: selectedCategoryIds,
       tags: product?.tags ? (typeof product.tags === "string" ? safeJsonParse(product.tags, []).join(", ") : product.tags.join(", ")) : "",
       images: images,
@@ -286,6 +286,27 @@ export function ProductForm({ product, categories, mode }: Props) {
                 />
                 <span className="text-sm">Deal of the Day</span>
               </label>
+              <div className="border-t pt-3 mt-2">
+                <label className="flex items-center justify-between min-h-[44px]">
+                  <div>
+                    <span className="text-sm font-medium">🚚 Free Shipping</span>
+                    <p className="text-[11px] text-muted-foreground">Skip the ₹49 shipping fee for this product</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setValue("freeShipping", !watch("freeShipping"))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      watch("freeShipping") ? "bg-green-500" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        watch("freeShipping") ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </label>
+              </div>
             </CardContent>
           </Card>
 

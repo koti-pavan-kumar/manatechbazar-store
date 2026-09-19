@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, categoryIds, tags, images, variants } = body;
+    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, categoryIds, tags, images, variants } = body;
 
     if (!title || !description || !mrp || !price || !categoryIds?.length || !images?.length) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -81,7 +81,7 @@ export async function PUT(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
 
     const body = await req.json();
-    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, categoryIds, tags, images } = body;
+    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, categoryIds, tags, images } = body;
 
     const discountPercent = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
@@ -103,6 +103,7 @@ export async function PUT(req: NextRequest) {
         isActive: isActive ?? true,
         isFeatured: isFeatured ?? false,
         isDealOfTheDay: isDealOfTheDay ?? false,
+        freeShipping: freeShipping ?? false,
         images: JSON.stringify(images),
         tags: JSON.stringify(tags ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
         ...(categoryIds && {

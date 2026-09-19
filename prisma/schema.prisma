@@ -103,6 +103,7 @@ model Product {
   isActive        Boolean   @default(true)
   isFeatured      Boolean   @default(false)
   isDealOfTheDay  Boolean   @default(false)
+  freeShipping    Boolean   @default(false)
   weight          Float?
   tags            String    @default("[]")   // JSON array stored as string for SQLite
   images          String    @default("[]")   // JSON array stored as string for SQLite
