@@ -49,14 +49,30 @@ export function ProductForm({ product, categories, mode }: Props) {
     },
   });
 
+  // Sync selectedCategoryIds to form field whenever it changes
+  const syncCategories = (newIds: string[]) => {
+    setSelectedCategoryIds(newIds);
+    setValue("categoryIds", newIds, { shouldValidate: false });
+  };
+
+  // Sync images to form field whenever it changes
+  const syncImages = (newImgs: string[]) => {
+    setImages(newImgs);
+    setValue("images", newImgs, { shouldValidate: false });
+  };
+
   const mrp = watch("mrp");
   const price = watch("price");
   const discount = mrp > 0 && price > 0 ? calcDiscount(mrp * 100, price * 100) : 0;
+
+  const [imageUrlInput, setImageUrlInput] = useState("");
+  const [uploadError, setUploadError] = useState("");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files?.length) return;
     setUploading(true);
+    setUploadError("");
     try {
       for (const file of Array.from(files)) {
         const formData = new FormData();
@@ -64,13 +80,24 @@ export function ProductForm({ product, categories, mode }: Props) {
         const res = await fetch("/api/upload", { method: "POST", body: formData });
         const data = await res.json();
         if (data.url) {
-          setImages((prev) => [...prev, data.url]);
+          syncImages([...images, data.url]);
+        } else {
+          setUploadError(data.error || "Upload failed — try pasting an image URL below instead");
         }
       }
     } catch {
-      alert("Upload failed");
+      setUploadError("Upload failed — try pasting an image URL below instead");
     } finally {
       setUploading(false);
+    }
+  };
+
+  const addImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (url && (url.startsWith("http://") || url.startsWith("https://"))) {
+      syncImages([...images, url]);
+      setImageUrlInput("");
+      setUploadError("");
     }
   };
 
@@ -177,7 +204,7 @@ export function ProductForm({ product, categories, mode }: Props) {
                     <img src={img} alt="" className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      onClick={() => setImages(images.filter((_, j) => j !== i))}
+                      onClick={() => syncImages(images.filter((_, j) => j !== i))}
                       className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-3 w-3" />
@@ -187,9 +214,24 @@ export function ProductForm({ product, categories, mode }: Props) {
               </div>
               <label className="flex items-center justify-center gap-2 p-4 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50 transition-colors min-h-[44px]">
                 <Upload className="h-4 w-4" />
-                <span className="text-sm">{uploading ? "Uploading..." : "Add Images"}</span>
+                <span className="text-sm">{uploading ? "Uploading..." : "Upload Image"}</span>
                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" disabled={uploading} />
               </label>
+              {uploadError && <p className="text-xs text-amber-600 mt-1">{uploadError}</p>}
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={imageUrlInput}
+                  onChange={(e) => setImageUrlInput(e.target.value)}
+                  placeholder="Or paste image URL here..."
+                  className="flex-1 h-9 px-3 rounded-lg border bg-background text-xs"
+                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addImageUrl())}
+                />
+                <button type="button" onClick={addImageUrl} className="px-3 h-9 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+                  Add
+                </button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">💡 Tip: You can paste image URLs from any website (Unsplash, Google Images, etc.)</p>
               {errors.images && <p className="text-xs text-red-500 mt-1">{errors.images.message as string}</p>}
               {images.length === 0 && !errors.images && <p className="text-xs text-amber-500 mt-1">⚠️ At least one image is required</p>}
             </CardContent>
@@ -205,9 +247,9 @@ export function ProductForm({ product, categories, mode }: Props) {
                     checked={selectedCategoryIds.includes(cat.id)}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        setSelectedCategoryIds([...selectedCategoryIds, cat.id]);
+                        syncCategories([...selectedCategoryIds, cat.id]);
                       } else {
-                        setSelectedCategoryIds(selectedCategoryIds.filter((id) => id !== cat.id));
+                        syncCategories(selectedCategoryIds.filter((id) => id !== cat.id));
                       }
                     }}
                   />
