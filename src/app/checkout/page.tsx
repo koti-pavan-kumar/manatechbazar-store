@@ -108,6 +108,17 @@ export default function CheckoutPage() {
             addressId,
             paymentMode: "COD",
             couponCode,
+            items: items.map((item) => ({
+              id: item.id,
+              title: item.title,
+              slug: item.slug,
+              price: item.price,
+              mrp: item.mrp,
+              image: item.image,
+              quantity: item.quantity,
+              stock: item.stock,
+              freeShipping: item.freeShipping,
+            })),
           }),
         });
         const data = await res.json();
@@ -126,6 +137,17 @@ export default function CheckoutPage() {
             addressId,
             paymentMode: "RAZORPAY",
             couponCode,
+            items: items.map((item) => ({
+              id: item.id,
+              title: item.title,
+              slug: item.slug,
+              price: item.price,
+              mrp: item.mrp,
+              image: item.image,
+              quantity: item.quantity,
+              stock: item.stock,
+              freeShipping: item.freeShipping,
+            })),
           }),
         });
         const data = await res.json();
