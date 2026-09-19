@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { db } from "@/lib/prisma";
 import { formatPrice, safeJsonParse } from "@/lib/utils";
 import Link from "next/link";
