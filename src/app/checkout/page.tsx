@@ -193,7 +193,9 @@ export default function CheckoutPage() {
             ondismiss: function () {
               setLoading(false);
             },
+            confirm_close: true,
           },
+          notes: { checkout_domain: "manatechbazar.in" },
         };
 
         const rzp = new window.Razorpay(options);
