@@ -25,61 +25,29 @@ const heroSlides = [
     title: "Trendy Gadgets",
     subtitle: "Style meets technology",
     description: "Sunglasses, watches, earbuds, speakers & more — all at unbeatable prices!",
-    gradient: "from-indigo-900 via-purple-900 to-violet-900",
-    accentColor: "#818cf8",
     category: "gadgets",
-    image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=1920&q=85",
-    products: [
-      "https://images.unsplash.com/photo-1572569511254-d8f925fe2cbb?w=400&q=80",
-      "https://images.unsplash.com/photo-1625245488600-f03fef636a3c?w=400&q=80",
-      "https://images.unsplash.com/photo-1546868871-af0de0ae72be?w=400&q=80",
-    ],
-    productLabels: ["Earbuds", "Smartwatch", "Speaker"],
+    image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&q=85",
   },
   {
     title: "Home & Kitchen",
     subtitle: "Smart living essentials",
     description: "Spoons, lighters, gas stoves & trendy kitchen gadgets you'll love!",
-    gradient: "from-emerald-900 via-teal-800 to-cyan-900",
-    accentColor: "#2dd4bf",
     category: "home-kitchen",
-    image: "https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=1920&q=85",
-    products: [
-      "https://images.unsplash.com/photo-1584568694244-14fbdf83bd30?w=400&q=80",
-      "https://images.unsplash.com/photo-1590794056226-79ef3a8147e1?w=400&q=80",
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80",
-    ],
-    productLabels: ["Utensils", "Spice Set", "Cookware"],
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=85",
   },
   {
-    title: "Jewellery &\nAccessories",
+    title: "Jewellery & Accessories",
     subtitle: "Elegance redefined",
     description: "Gold plated earrings, necklaces, bangles & stunning jewellery for every occasion!",
-    gradient: "from-amber-900 via-rose-900 to-pink-900",
-    accentColor: "#f59e0b",
     category: "jewellery",
-    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=1920&q=85",
-    products: [
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?w=400&q=80",
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=400&q=80",
-      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?w=400&q=80",
-    ],
-    productLabels: ["Necklace", "Bangles", "Earrings"],
+    image: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=1920&q=85",
   },
   {
     title: "Toys & Games",
     subtitle: "Fun for every age",
     description: "Rubik's cubes, RC cars, puzzles, teddy bears & everything kids love!",
-    gradient: "from-blue-900 via-indigo-900 to-purple-900",
-    accentColor: "#818cf8",
     category: "toys-games",
-    image: "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1920&q=85",
-    products: [
-      "https://images.unsplash.com/photo-1594787318286-3d835c1d207f?w=400&q=80",
-      "https://images.unsplash.com/photo-1566576782541-d6c5e51f4d48?w=400&q=80",
-      "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=400&q=80",
-    ],
-    productLabels: ["Building Blocks", "RC Car", "Puzzle"],
+    image: "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=1920&q=85",
   },
 ];
 
@@ -152,100 +120,67 @@ export function HomeContent({ data }: { data: HomeData }) {
     <div className="space-y-0">
       {/* ═══════════ HERO SLIDESHOW ═══════════ */}
       <section className="relative overflow-hidden">
-        <Link href={`/category/${slide.category}`} className="block">
-          <div className={`relative bg-gradient-to-br ${slide.gradient} transition-all duration-700 cursor-pointer group`}>
-            {/* Full-Width Background Image with Ken Burns zoom */}
-            <div className="absolute inset-0 overflow-hidden">
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                fill
-                className="object-cover transition-transform duration-[8000ms] ease-out group-hover:scale-110"
-                priority
-                sizes="100vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
+        <Link href={`/category/${slide.category}`} className="block group">
+          <div className="relative h-[55vh] sm:h-[65vh] lg:h-[75vh] overflow-hidden">
+            {/* Full-Screen Background Image */}
+            <Image
+              src={slide.image}
+              alt={slide.title}
+              fill
+              className="object-cover transition-transform duration-[8000ms] ease-out group-hover:scale-105"
+              priority
+              sizes="100vw"
+            />
 
-            {/* Floating Product Cards with 3D entrance */}
-            <div className="absolute right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 hidden md:flex flex-col gap-3">
-              {(slide as any).products?.map((pImg: string, idx: number) => (
-                <div
-                  key={idx}
-                  className="relative w-28 h-28 lg:w-36 lg:h-36 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20 backdrop-blur-sm bg-white/10 animate-float-card"
-                  style={{
-                    animationDelay: `${idx * 200}ms`,
-                    transform: `perspective(800px) rotateY(-8deg) rotateX(${idx * 3 - 3}deg)`,
-                  }}
-                >
-                  <Image src={pImg} alt={(slide as any).productLabels?.[idx] || ""} fill className="object-cover" sizes="150px" />
-                  <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                    <p className="text-white text-[10px] lg:text-xs font-semibold truncate">{(slide as any).productLabels?.[idx]}</p>
+            {/* Gradient overlays for text readability — left side strong, right side light */}
+            <div className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/35 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20" />
+
+            {/* Text Content — left-aligned, large, bold */}
+            <div className="absolute inset-0 flex items-center">
+              <div className="mx-auto max-w-7xl w-full px-6 sm:px-8">
+                <div key={currentSlide} className="max-w-xl space-y-4 sm:space-y-5 animate-fade-in-up">
+                  <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/25 rounded-full px-4 py-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
+                    <span className="text-white/95 text-sm font-medium">{slide.subtitle}</span>
                   </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Mobile: Show small floating product thumbnails */}
-            <div className="absolute right-3 bottom-20 flex md:hidden gap-2">
-              {(slide as any).products?.slice(0, 2).map((pImg: string, idx: number) => (
-                <div
-                  key={idx}
-                  className="relative w-16 h-16 rounded-xl overflow-hidden shadow-xl border-2 border-white/20"
-                  style={{ animationDelay: `${idx * 200}ms` }}
-                >
-                  <Image src={pImg} alt="" fill className="object-cover" sizes="64px" />
-                </div>
-              ))}
-            </div>
-
-            {/* Text Content with staggered animation */}
-            <div className="relative mx-auto max-w-7xl px-4 py-16 sm:py-24 lg:py-32">
-              <div key={currentSlide} className="max-w-lg text-white space-y-5">
-                <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-4 py-1.5 text-sm font-medium animate-fade-in-up" style={{ animationDelay: "100ms" }}>
-                  <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
-                  <span className="text-white/90">{slide.subtitle}</span>
-                </div>
-                <h1
-                  className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-[1.1] drop-shadow-2xl animate-fade-in-up whitespace-pre-line"
-                  style={{ animationDelay: "200ms" }}
-                >
-                  {slide.title.split(/(\s|\n)/).map((word, i) => {
-                    if (word === "\n") return <br key={i} />;
-                    const isAccent = ["Gadgets", "Kitchen", "Jewellery", "Accessories", "Games", "&"].includes(word);
-                    return isAccent ? (
-                      <span key={i} className="bg-gradient-to-r from-yellow-300 to-amber-300 bg-clip-text text-transparent">{word} </span>
+                  <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight">
+                    {slide.title.includes("&") ? (
+                      <>
+                        {slide.title.split("&")[0]}<span className="text-yellow-400">&</span>{slide.title.split("&")[1]}
+                      </>
                     ) : (
-                      <span key={i}>{word} </span>
-                    );
-                  })}
-                </h1>
-                <p className="text-base sm:text-lg text-white/80 max-w-md drop-shadow-lg animate-fade-in-up" style={{ animationDelay: "350ms" }}>
-                  {slide.description}
-                </p>
-                <div className="pt-2 animate-fade-in-up" style={{ animationDelay: "500ms" }}>
-                  <span className="inline-flex items-center h-13 sm:h-14 px-8 sm:px-10 font-bold rounded-2xl bg-white text-gray-900 shadow-2xl transition-all duration-300 group-hover:scale-105 group-hover:shadow-white/20 text-sm sm:text-base">
-                    <ShoppingBag className="h-5 w-5 mr-2" /> Shop Now <ArrowRight className="h-5 w-5 ml-2 transition-transform group-hover:translate-x-1" />
-                  </span>
+                      <>{slide.title.split(" ").map((word, i) => (
+                        <span key={i}>{word} </span>
+                      ))}</>
+                    )}
+                  </h1>
+                  <p className="text-base sm:text-lg lg:text-xl text-white/85 max-w-md leading-relaxed">
+                    {slide.description}
+                  </p>
+                  <div className="pt-2">
+                    <span className="inline-flex items-center gap-2 h-12 sm:h-14 px-8 sm:px-10 font-bold rounded-2xl bg-white text-gray-900 shadow-2xl transition-all duration-300 group-hover:scale-105 text-sm sm:text-base">
+                      <ShoppingBag className="h-5 w-5" /> Shop Now <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-
-            {/* Slide Controls */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); prevSlide(); }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors">
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              {heroSlides.map((_, i) => (
-                <button key={i} onClick={(e) => { e.preventDefault(); e.stopPropagation(); goToSlide(i); }} className={`h-2.5 rounded-full transition-all duration-300 ${i === currentSlide ? "w-8 bg-white" : "w-2.5 bg-white/40 hover:bg-white/60"}`} />
-              ))}
-              <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); nextSlide(); }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors">
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </div>
           </div>
         </Link>
+
+        {/* Slide Controls — positioned below the slide */}
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-3 z-10">
+          <button onClick={prevSlide} className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors">
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          {heroSlides.map((_, i) => (
+            <button key={i} onClick={() => goToSlide(i)} className={`h-2.5 rounded-full transition-all duration-300 ${i === currentSlide ? "w-8 bg-white" : "w-2.5 bg-white/40 hover:bg-white/60"}`} />
+          ))}
+          <button onClick={nextSlide} className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors">
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
       </section>
 
       {/* ═══════════ HOT SALE SECTION ═══════════ */}
