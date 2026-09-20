@@ -212,12 +212,12 @@ export function HomeContent({ data }: { data: HomeData }) {
           {/* 3D Animated Price Tabs — Navigate to new page */}
           <div className="flex justify-center gap-3 sm:gap-4 mb-4">
             {[
-              { key: "199", label: "Under ₹199", emoji: "🏷️", gradient: "from-pink-500 to-rose-500", shadow: "shadow-pink-500/30", count: allProducts.filter((p) => p.price / 100 <= 199).length },
-              { key: "499", label: "Under ₹499", emoji: "🔥", gradient: "from-orange-500 to-amber-500", shadow: "shadow-orange-500/30", count: allProducts.filter((p) => p.price / 100 <= 499).length },
-              { key: "999", label: "Under ₹999", emoji: "⚡", gradient: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/30", count: allProducts.filter((p) => p.price / 100 <= 999).length },
+              { key: "199", label: "₹199", emoji: "🏷️", gradient: "from-pink-500 to-rose-500", shadow: "shadow-pink-500/30", count: allProducts.filter((p) => p.price / 100 <= 199).length },
+              { key: "499", label: "₹499", emoji: "🔥", gradient: "from-orange-500 to-amber-500", shadow: "shadow-orange-500/30", count: allProducts.filter((p) => p.price / 100 <= 499).length },
+              { key: "999", label: "₹999", emoji: "⚡", gradient: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/30", count: allProducts.filter((p) => p.price / 100 <= 999).length },
             ].map((tab) => (
               <Link key={tab.key} href={`/deals?max=${tab.key}`}>
-                <div className={`relative group cursor-pointer transition-all duration-500 bg-gradient-to-r ${tab.gradient} text-white shadow-xl ${tab.shadow} hover:scale-110 hover:-translate-y-2 rounded-2xl px-5 sm:px-8 py-4 sm:py-5 font-bold text-sm sm:text-base`}
+                <div className={`relative group cursor-pointer transition-all duration-500 bg-gradient-to-br ${tab.gradient} text-white shadow-xl ${tab.shadow} hover:scale-110 hover:-translate-y-2 rounded-full w-28 h-28 sm:w-36 sm:h-36 flex flex-col items-center justify-center font-bold text-sm sm:text-base`}
                 >
                   <span className="mr-1.5 text-lg">{tab.emoji}</span>
                   {tab.label}
