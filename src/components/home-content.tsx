@@ -26,28 +26,28 @@ const heroSlides = [
     subtitle: "Style meets technology",
     description: "Sunglasses, watches, earbuds, speakers & more — all at unbeatable prices!",
     category: "gadgets",
-    image: "https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1920&q=85",
+    image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893576/hzhszbzy8nhh5awjn9ph.png",
   },
   {
     title: "Home & Kitchen",
     subtitle: "Smart living essentials",
     description: "Spoons, lighters, gas stoves & trendy kitchen gadgets you'll love!",
     category: "home-kitchen",
-    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1920&q=85",
+    image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893632/mwbzdbixtvwc7rcb6laz.png",
   },
   {
-    title: "Jewellery & Accessories",
+    title: "Jewellery & Fashion",
     subtitle: "Elegance redefined",
     description: "Gold plated earrings, necklaces, bangles & stunning jewellery for every occasion!",
     category: "jewellery",
-    image: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=1920&q=85",
+    image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893601/gahsnav4taz0tvlzw2ev.png",
   },
   {
     title: "Toys & Games",
     subtitle: "Fun for every age",
     description: "Rubik's cubes, RC cars, puzzles, teddy bears & everything kids love!",
     category: "toys-games",
-    image: "https://images.unsplash.com/photo-1558060370-d644479cb6f7?w=1920&q=85",
+    image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893668/kqugkrx0fet1saqhosau.png",
   },
 ];
 
