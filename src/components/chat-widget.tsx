@@ -63,7 +63,7 @@ export function ChatWidget() {
       {/* Toggle Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-20 left-4 lg:bottom-6 lg:left-6 z-50 h-14 w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-110 flex items-center justify-center"
+        className="fixed bottom-[76px] left-4 lg:bottom-6 lg:left-6 z-50 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-110 flex items-center justify-center"
         aria-label="Ask Mohan"
       >
         {open ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
@@ -71,7 +71,7 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-36 left-4 lg:bottom-20 lg:left-6 z-50 w-[calc(100vw-32px)] max-w-sm h-[450px] rounded-2xl border bg-background shadow-2xl flex flex-col animate-slide-up overflow-hidden">
+        <div className="fixed bottom-[140px] left-4 lg:bottom-20 lg:left-6 z-50 w-[calc(100vw-32px)] max-w-sm h-[400px] sm:h-[450px] rounded-2xl border bg-background shadow-2xl flex flex-col animate-slide-up overflow-hidden">
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">

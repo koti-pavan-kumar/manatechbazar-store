@@ -535,7 +535,7 @@ export function ProductDetailContent({ product, related }: Props) {
 
       {/* Sticky Mobile Buy Now + Add to Cart */}
       {currentStock > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 border-t bg-background p-3 lg:hidden z-40">
+        <div className="fixed bottom-[68px] left-0 right-0 border-t bg-background p-3 lg:hidden z-40">
           <div className="flex items-center gap-2">
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground truncate">{product.title}</p>

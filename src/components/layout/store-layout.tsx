@@ -8,9 +8,9 @@ import { ChatWidget } from "@/components/chat-widget";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col overflow-x-hidden">
       <Header />
-      <main className="flex-1 pb-20 lg:pb-0">{children}</main>
+      <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">{children}</main>
       <Footer />
       <BottomNav />
       <WhatsAppButton />

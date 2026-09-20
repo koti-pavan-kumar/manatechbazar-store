@@ -185,7 +185,7 @@ export function HomeContent({ data }: { data: HomeData }) {
 
       {/* ═══════════ HOT SALE SECTION ═══════════ */}
       <RevealSection>
-        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
+        <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12 overflow-hidden">
           {/* Hot Sale Header */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-3">

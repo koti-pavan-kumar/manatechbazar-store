@@ -44,6 +44,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
     if (!el) return;
+    // Disable tilt on mobile to prevent horizontal overflow
+    if (window.innerWidth < 640) return;
     const rect = el.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -105,7 +107,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   };
 
   return (
-    <Link href={`/products/${product.slug}`} className="group block">
+    <Link href={`/products/${product.slug}`} className="group block overflow-hidden">
       <div
         ref={cardRef}
         onMouseMove={handleMouseMove}
