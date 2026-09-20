@@ -104,6 +104,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
             className="object-cover"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
+            unoptimized
           />
         </div>
 
