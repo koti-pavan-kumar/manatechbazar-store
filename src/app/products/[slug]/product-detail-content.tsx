@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   Heart, ShoppingCart, Star, Truck, Shield, ChevronLeft, MessageCircle,
-  Minus, Plus, Share2, ChevronRight, Pencil, Trash2, Eye, EyeOff, Loader2,
+  Minus, Plus, Share2, ChevronRight, Pencil, Trash2, Eye, EyeOff, Loader2, Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,11 @@ export function ProductDetailContent({ product, related }: Props) {
         ? [selectedVariant.size, selectedVariant.color].filter(Boolean).join(" / ")
         : undefined,
     }, quantity);
+  };
+
+  const handleBuyNow = () => {
+    handleAddToCart();
+    router.push("/checkout");
   };
 
   const handleWishlist = () => {
@@ -343,8 +348,11 @@ export function ProductDetailContent({ product, related }: Props) {
           <div className="space-y-3">
             {currentStock > 0 ? (
               <div className="flex gap-3">
-                <Button size="lg" className="flex-1" onClick={handleAddToCart}>
-                  <ShoppingCart className="h-5 w-5" /> Add to Cart
+                <Button size="lg" className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white" onClick={handleBuyNow}>
+                  ⚡ Buy Now
+                </Button>
+                <Button size="lg" variant="outline" onClick={handleAddToCart}>
+                  <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleWishlist}>
                   <Heart className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
@@ -525,16 +533,19 @@ export function ProductDetailContent({ product, related }: Props) {
         </section>
       )}
 
-      {/* Sticky Mobile Add to Cart */}
+      {/* Sticky Mobile Buy Now + Add to Cart */}
       {currentStock > 0 && (
-        <div className="fixed bottom-16 left-0 right-0 border-t bg-background p-4 lg:hidden z-40">
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground">{product.title}</p>
-              <p className="font-bold">{formatPrice(currentPrice)}</p>
+        <div className="fixed bottom-16 left-0 right-0 border-t bg-background p-3 lg:hidden z-40">
+          <div className="flex items-center gap-2">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground truncate">{product.title}</p>
+              <p className="font-bold text-sm">{formatPrice(currentPrice)}</p>
             </div>
-            <Button size="lg" onClick={handleAddToCart} className="px-6">
-              <ShoppingCart className="h-5 w-5" /> Add to Cart
+            <Button size="sm" onClick={handleAddToCart} className="px-3 h-10 rounded-xl font-semibold text-xs shrink-0">
+              <ShoppingCart className="h-4 w-4 mr-1" /> Cart
+            </Button>
+            <Button size="sm" onClick={handleBuyNow} className="px-4 h-10 rounded-xl font-semibold text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shrink-0">
+              ⚡ Buy Now
             </Button>
           </div>
         </div>

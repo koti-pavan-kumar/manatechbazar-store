@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Eye } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice, calcDiscount, safeJsonParse } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCallback, useRef } from "react";
 
@@ -32,6 +33,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const imageUrl = images[0] || "/placeholder-product.jpg";
   const discount = product.discountPercent || calcDiscount(product.mrp, product.price);
 
+  const router = useRouter();
   const addItem = useCartStore((s) => s.addItem);
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
@@ -71,6 +73,22 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       stock: product.stock,
       freeShipping: product.freeShipping,
     });
+  };
+
+  const handleBuyNow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      mrp: product.mrp,
+      image: imageUrl,
+      stock: product.stock,
+      freeShipping: product.freeShipping,
+    });
+    router.push("/checkout");
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -142,21 +160,31 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         {/* Quick actions (appear on hover) */}
         <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-300">
           {product.stock > 0 ? (
-            <Button
-              size="sm"
-              onClick={handleAddToCart}
-              className="flex-1 h-10 rounded-xl bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold text-xs"
-            >
-              <ShoppingCart className="h-4 w-4 mr-1.5" />
-              Add to Cart
-            </Button>
+            <>
+              <Button
+                size="sm"
+                onClick={handleBuyNow}
+                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg font-semibold text-xs px-3"
+              >
+                <Zap className="h-4 w-4 mr-1" />
+                Buy Now
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleAddToCart}
+                className="h-10 rounded-xl bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold text-xs px-3"
+              >
+                <ShoppingCart className="h-4 w-4 mr-1" />
+                Cart
+              </Button>
+            </>
           ) : (
             <Badge variant="secondary" className="flex-1 h-10 rounded-xl bg-white/90 flex items-center justify-center shadow-lg text-xs">
               Out of Stock
             </Badge>
           )}
           <div
-            className="h-10 w-10 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-lg transition-colors"
+            className="h-10 w-10 rounded-xl bg-white/80 backdrop-blur-sm flex items-center justify-center hover:bg-white shadow-lg transition-colors shrink-0"
           >
             <Eye className="h-4 w-4 text-gray-700" />
           </div>
