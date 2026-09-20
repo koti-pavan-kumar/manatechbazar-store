@@ -360,3 +360,41 @@
 .glow-border:hover::after {
   opacity: 1;
 }
+
+/* ─── Hero Slide Animations ──────────────────────────────── */
+@keyframes float-card {
+  0%, 100% { transform: perspective(800px) rotateY(-8deg) rotateX(0deg) translateY(0px); }
+  25% { transform: perspective(800px) rotateY(-5deg) rotateX(2deg) translateY(-8px); }
+  50% { transform: perspective(800px) rotateY(-10deg) rotateX(-1deg) translateY(-4px); }
+  75% { transform: perspective(800px) rotateY(-6deg) rotateX(1deg) translateY(-10px); }
+}
+@keyframes fade-in-up {
+  from { transform: translateY(24px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes shimmer-line {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes ken-burns {
+  0% { transform: scale(1.0); }
+  100% { transform: scale(1.08); }
+}
+@keyframes glow-ring {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50% { box-shadow: 0 0 20px 4px rgba(255,255,255,0.1); }
+}
+
+.animate-float-card {
+  animation: float-card 6s ease-in-out infinite;
+}
+.animate-fade-in-up {
+  opacity: 0;
+  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-shimmer-line {
+  animation: shimmer-line 2s ease-in-out infinite;
+}
+.animate-glow-ring {
+  animation: glow-ring 3s ease-in-out infinite;
+}
