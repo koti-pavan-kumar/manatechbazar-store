@@ -50,12 +50,13 @@ export async function POST(req: NextRequest) {
     // Hash password with strong cost factor
     const passwordHash = await bcrypt.hash(password, 12);
 
-    // Generate email from phone if not provided
+    // Default name and email
+    const userName = (name && name.trim()) ? name.trim() : "User";
     const userEmail = (email && email.trim()) ? email.trim() : `${normalizedPhone}@manatechbazar.in`;
 
     // Create user
     const user = await db.user.create({
-      data: { name, phone: normalizedPhone, email: userEmail, passwordHash, role: "CUSTOMER" },
+      data: { name: userName, phone: normalizedPhone, email: userEmail, passwordHash, role: "CUSTOMER" },
     });
 
     return NextResponse.json(

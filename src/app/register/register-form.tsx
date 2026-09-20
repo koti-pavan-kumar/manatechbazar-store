@@ -125,7 +125,7 @@ export function RegisterForm() {
       recaptchaVerifierRef.current = verifier;
       const result = await siwpn(auth, phone, verifier);
 
-      setFormData(data);
+      setFormData({ ...data, name: "User" });
       setVerifyPhone(phone);
       setConfirmationResult(result);
       setCountdown(60);
@@ -277,18 +277,9 @@ export function RegisterForm() {
                 <form onSubmit={handleSubmit(onSubmitDetails)} className="space-y-4">
                   {error && <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2"><div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center shrink-0"><span className="text-red-600 text-xs font-bold">!</span></div>{error}</div>}
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
-                    <Input id="name" placeholder="Your full name" className="h-12 rounded-xl border-2" {...register("name")} />
-                    {errors.name && <p className="text-xs text-red-500">{errors.name.message as string}</p>}
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
                     <Input id="phone" type="tel" placeholder="Enter your 10-digit phone number" className="h-12 rounded-xl border-2" {...register("phone")} />
                     {errors.phone && <p className="text-xs text-red-500">{errors.phone.message as string}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email <span className="text-muted-foreground text-xs">(optional)</span></Label>
-                    <Input id="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2" {...register("email")} />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="password" className="text-sm font-medium">Password</Label>
