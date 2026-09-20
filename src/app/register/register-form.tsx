@@ -270,7 +270,7 @@ export function RegisterForm() {
                   <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center"><Sparkles className="h-4 w-4 text-primary" /></div>
                   <span className="text-sm font-medium text-primary">Get Started</span>
                 </div>
-                <h2 className="text-3xl font-bold tracking-tight">Create your account</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Create Account</h2>
                 <p className="text-muted-foreground mt-2">Join Mana Tech Bazar and start shopping!</p>
               </div>
               <div className="bg-card rounded-2xl border shadow-lg p-6 sm:p-8">
@@ -311,7 +311,7 @@ export function RegisterForm() {
                 </form>
                 <p className="text-xs text-center text-muted-foreground mt-4">By creating an account, you agree to our <Link href="#" className="text-primary hover:underline">Terms</Link> and <Link href="#" className="text-primary hover:underline">Privacy Policy</Link></p>
               </div>
-              <div className="mt-6 text-center"><p className="text-sm text-muted-foreground">Already have an account? <Link href="/login" className="text-primary font-semibold hover:underline">Sign in</Link></p></div>
+              <div className="mt-6 text-center"><p className="text-sm text-muted-foreground">Already have an account? <Link href="/login" className="text-primary font-semibold hover:underline">Login</Link></p></div>
               <div className="mt-4 text-center"><Link href="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to store</Link></div>
             </>
           )}

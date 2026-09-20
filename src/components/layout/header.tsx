@@ -78,7 +78,7 @@ export function Header() {
             </Button>
           </Link>
 
-          <Link href="/account" aria-label="Account">
+          <Link href="/register" aria-label="Account">
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
@@ -121,8 +121,8 @@ export function Header() {
             <Link href="/wishlist" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
               ❤️ My Wishlist
             </Link>
-            <Link href="/account" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
-              My Account
+            <Link href="/register" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
+              Create Account
             </Link>
             <a href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px]">
               <Instagram className="h-5 w-5" /> Follow on Instagram

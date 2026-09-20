@@ -61,14 +61,14 @@ export default function AccountPage() {
         <h1 className="text-2xl sm:text-3xl font-extrabold mb-2 text-center">Welcome back!</h1>
         <p className="text-muted-foreground mb-8 text-center max-w-sm">Sign in to track orders, manage your wishlist, and enjoy a personalised shopping experience.</p>
         <div className="flex gap-3">
-          <Link href="/login">
+          <Link href="/register">
             <Button size="lg" className="rounded-2xl px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
-              Sign In
+              Create Account
             </Button>
           </Link>
-          <Link href="/register">
+          <Link href="/login">
             <Button size="lg" variant="outline" className="rounded-2xl px-8 font-bold">
-              Create Account
+              Login
             </Button>
           </Link>
         </div>

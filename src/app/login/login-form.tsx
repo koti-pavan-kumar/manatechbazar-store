@@ -192,7 +192,7 @@ export function LoginForm() {
               </div>
               <span className="text-sm font-medium text-primary">Welcome Back</span>
             </div>
-            <h2 className="text-3xl font-bold tracking-tight">Sign in to your account</h2>
+            <h2 className="text-3xl font-bold tracking-tight">Login to your account</h2>
             <p className="text-muted-foreground mt-2">Continue shopping with Mana Tech Bazar</p>
           </div>
 
@@ -262,7 +262,7 @@ export function LoginForm() {
                   <Loader2 className="h-5 w-5 animate-spin mr-2" />
                 ) : (
                   <>
-                    Sign In
+                    Login
                     <ArrowRight className="h-4 w-4 ml-2" />
                   </>
                 )}
@@ -302,7 +302,7 @@ export function LoginForm() {
             <p className="text-sm text-muted-foreground">
               Don&apos;t have an account?{" "}
               <Link href="/register" className="text-primary font-semibold hover:underline underline-offset-4 transition-colors">
-                Create one now
+                Create Account
               </Link>
             </p>
           </div>
