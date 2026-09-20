@@ -398,3 +398,24 @@
 .animate-glow-ring {
   animation: glow-ring 3s ease-in-out infinite;
 }
+
+/* 3D Price text effect */
+@keyframes price-pulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.04); filter: brightness(1.15); }
+}
+.price-3d {
+  text-shadow:
+    0 2px 4px rgba(0,0,0,0.3),
+    0 4px 12px rgba(0,0,0,0.25),
+    0 0 20px rgba(255,255,255,0.15);
+  transition: all 0.3s ease;
+}
+.group:hover .price-3d {
+  animation: price-pulse 1.2s ease-in-out infinite;
+  text-shadow:
+    0 3px 6px rgba(0,0,0,0.4),
+    0 6px 20px rgba(0,0,0,0.3),
+    0 0 30px rgba(255,255,255,0.25),
+    0 0 40px rgba(255,255,255,0.1);
+}

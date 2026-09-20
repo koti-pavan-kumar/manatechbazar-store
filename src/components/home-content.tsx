@@ -217,11 +217,15 @@ export function HomeContent({ data }: { data: HomeData }) {
               { key: "999", label: "₹999", emoji: "⚡", gradient: "from-violet-500 to-purple-500", shadow: "shadow-violet-500/30", count: allProducts.filter((p) => p.price / 100 <= 999).length },
             ].map((tab) => (
               <Link key={tab.key} href={`/deals?max=${tab.key}`}>
-                <div className={`relative group cursor-pointer transition-all duration-500 bg-gradient-to-br ${tab.gradient} text-white shadow-xl ${tab.shadow} hover:scale-110 hover:-translate-y-2 rounded-full w-28 h-28 sm:w-36 sm:h-36 flex flex-col items-center justify-center font-bold text-sm sm:text-base`}
+                <div className={`relative group cursor-pointer transition-all duration-500 bg-gradient-to-br ${tab.gradient} text-white shadow-xl ${tab.shadow} hover:scale-110 hover:-translate-y-2 rounded-full w-28 h-28 sm:w-36 sm:h-36 flex flex-col items-center justify-center overflow-hidden`}
                 >
-                  <span className="mr-1.5 text-lg">{tab.emoji}</span>
-                  {tab.label}
-                  <div className="text-center text-[11px] text-white/70 font-normal mt-1">{tab.count} products</div>
+                  {/* 3D glow ring on hover */}
+                  <div className="absolute inset-1 rounded-full border-2 border-white/20 group-hover:border-white/40 transition-all duration-500 group-hover:scale-110" />
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-t from-black/20 to-transparent" />
+                  <span className="text-lg sm:text-xl mb-0.5 relative z-10 drop-shadow-lg">{tab.emoji}</span>
+                  <span className="text-2xl sm:text-4xl lg:text-5xl font-black relative z-10 tracking-tight leading-none price-3d"
+                  >{tab.label}</span>
+                  <div className="text-center text-[10px] sm:text-[11px] text-white/80 font-medium mt-1 relative z-10 tracking-wide">{tab.count} items</div>
                 </div>
               </Link>
             ))}
