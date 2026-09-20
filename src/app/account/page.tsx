@@ -125,7 +125,7 @@ export default function AccountPage() {
                 )}
               </div>
               <p className="text-white/50 text-sm flex items-center gap-1.5 mt-1">
-                <Mail className="h-3.5 w-3.5" /> {user.email}
+                <Phone className="h-3.5 w-3.5" /> {(user as any).phone || user.email}
               </p>
               <p className="text-white/40 text-xs flex items-center gap-1.5 mt-0.5">
                 <Calendar className="h-3 w-3" /> Member since {memberSince}
@@ -236,8 +236,8 @@ export default function AccountPage() {
                   <p className="text-lg font-bold text-gray-900 mt-1">{user.name}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 border border-gray-100">
-                  <Label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Email Address</Label>
-                  <p className="text-lg font-bold text-gray-900 mt-1">{user.email}</p>
+                  <Label className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Phone Number</Label>
+                  <p className="text-lg font-bold text-gray-900 mt-1">{(user as any).phone || "Not set"}</p>
                 </div>
               </div>
             </div>
@@ -466,11 +466,11 @@ export default function AccountPage() {
               <div className="px-6 py-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <Mail className="h-5 w-5 text-blue-500" />
+                    <Phone className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900">Email</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="text-sm font-bold text-gray-900">Phone Number</p>
+                    <p className="text-xs text-gray-500">{(user as any).phone || user.email}</p>
                   </div>
                 </div>
                 <Badge className="bg-green-100 text-green-700 border-0">Verified</Badge>

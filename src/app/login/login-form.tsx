@@ -44,12 +44,12 @@ export function LoginForm() {
     setError("");
     try {
       const result = await signIn("credentials", {
-        email: data.email,
+        phone: data.phone,
         password: data.password,
         redirect: false,
       });
       if (result?.error) {
-        setError("Invalid email or password");
+        setError("Invalid phone number or password");
       } else {
         window.location.href = callbackUrl;
       }
@@ -215,17 +215,17 @@ export function LoginForm() {
               )}
 
               <div className="space-y-2 animate-slide-in-up" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
-                <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
+                <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
                 <div className="relative group">
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="you@example.com"
+                    id="phone"
+                    type="tel"
+                    placeholder="Enter your 10-digit phone number"
                     className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0"
-                    {...register("email")}
+                    {...register("phone")}
                   />
                 </div>
-                {errors.email && <p className="text-xs text-red-500 flex items-center gap-1">{errors.email.message as string}</p>}
+                {errors.phone && <p className="text-xs text-red-500 flex items-center gap-1">{errors.phone.message as string}</p>}
               </div>
 
               <div className="space-y-2 animate-slide-in-up" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>

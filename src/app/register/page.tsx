@@ -141,7 +141,7 @@ export default function RegisterPage() {
 
       // Auto-login after successful registration
       const signInResult = await signIn("credentials", {
-        email: formData.email,
+        phone: formData.phone,
         password: formData.password,
         redirect: false,
       });
@@ -331,14 +331,15 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email address</Label>
-                    <Input id="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0" {...register("email")} />
-                    {errors.email && <p className="text-xs text-red-500">{errors.email.message as string}</p>}
+                    <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                    <Input id="phone" type="tel" placeholder="Enter your 10-digit phone number" className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0" {...register("phone")} />
+                    {errors.phone && <p className="text-xs text-red-500">{errors.phone.message as string}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-sm font-medium">Phone <span className="text-muted-foreground">(optional)</span></Label>
-                    <Input id="phone" type="tel" placeholder="+91 99999 99999" className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0" {...register("phone")} />
+                    <Label htmlFor="email" className="text-sm font-medium">Email <span className="text-muted-foreground">(optional)</span></Label>
+                    <Input id="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0" {...register("email")} />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email.message as string}</p>}
                   </div>
 
                   <div className="space-y-2">

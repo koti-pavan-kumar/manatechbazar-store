@@ -29,22 +29,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, password } = parsed.data;
+    const { name, phone, email, password } = parsed.data;
 
-    // Check if email is verified before creating account
-    const verified = await isEmailVerified(email, "REGISTER");
-    if (!verified) {
-      return NextResponse.json(
-        { error: "Please verify your email before creating an account" },
-        { status: 400 }
-      );
-    }
+    // Normalize phone
+    let normalizedPhone = phone.replace(/[\s\-]/g, "");
+    if (normalizedPhone.startsWith("+91")) normalizedPhone = normalizedPhone.slice(3);
+    if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) normalizedPhone = normalizedPhone.slice(2);
 
-    // Check existing user
-    const existing = await db.user.findUnique({ where: { email } });
+    // Check existing user by phone
+    const existing = await db.user.findUnique({ where: { phone: normalizedPhone } });
     if (existing) {
       return NextResponse.json(
-        { error: "An account with this email already exists" },
+        { error: "An account with this phone number already exists" },
         { status: 409 }
       );
     }
@@ -52,9 +48,12 @@ export async function POST(req: NextRequest) {
     // Hash password with strong cost factor
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Generate email from phone if not provided
+    const userEmail = email || `${normalizedPhone}@manatechbazar.in`;
+
     // Create user
     const user = await db.user.create({
-      data: { name, email, passwordHash, role: "CUSTOMER" },
+      data: { name, phone: normalizedPhone, email: userEmail, passwordHash, role: "CUSTOMER" },
     });
 
     return NextResponse.json(

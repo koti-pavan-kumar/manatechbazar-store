@@ -2,14 +2,14 @@ import { z } from "zod";
 
 // ─── Auth ──────────────────────────────────────────────────────
 export const loginSchema = z.object({
-  email: z.string().email("Please enter a valid email"),
+  phone: z.string().min(10, "Please enter a valid 10-digit phone number"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Please enter a valid email"),
-  phone: z.string().min(10, "Please enter a valid phone number").optional(),
+  phone: z.string().min(10, "Please enter a valid 10-digit phone number"),
+  email: z.string().email("Please enter a valid email").optional(),
   password: z.string().min(6, "Password must be at least 6 characters"),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
