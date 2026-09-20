@@ -5,10 +5,12 @@ import { Footer } from "./footer";
 import { BottomNav } from "./bottom-nav";
 import { WhatsAppButton } from "./whatsapp-button";
 import { ChatWidget } from "@/components/chat-widget";
+import { NavLoading } from "@/components/nav-loading";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-dvh flex-col overflow-x-hidden">
+      <NavLoading />
       <Header />
       <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">{children}</main>
       <Footer />

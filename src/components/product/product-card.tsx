@@ -10,7 +10,8 @@ import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 
 interface ProductCardProps {
   product: {
@@ -62,24 +63,13 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
     el.style.transform = "perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
   }, []);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem({
-      id: product.id,
-      title: product.title,
-      slug: product.slug,
-      price: product.price,
-      mrp: product.mrp,
-      image: imageUrl,
-      stock: product.stock,
-      freeShipping: product.freeShipping,
-    });
-  };
+  const [buyingNow, setBuyingNow] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setBuyingNow(true);
     addItem({
       id: product.id,
       title: product.title,
@@ -91,6 +81,23 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       freeShipping: product.freeShipping,
     });
     router.push("/checkout");
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setAddingToCart(true);
+    addItem({
+      id: product.id,
+      title: product.title,
+      slug: product.slug,
+      price: product.price,
+      mrp: product.mrp,
+      image: imageUrl,
+      stock: product.stock,
+      freeShipping: product.freeShipping,
+    });
+    setTimeout(() => setAddingToCart(false), 600);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -166,18 +173,20 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               <Button
                 size="sm"
                 onClick={handleBuyNow}
+                disabled={buyingNow}
                 className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg font-semibold text-xs px-3"
               >
-                <Zap className="h-4 w-4 mr-1" />
-                Buy Now
+                {buyingNow ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
+                {buyingNow ? "Loading..." : "Buy Now"}
               </Button>
               <Button
                 size="sm"
                 onClick={handleAddToCart}
+                disabled={addingToCart}
                 className="h-10 rounded-xl bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold text-xs px-3"
               >
-                <ShoppingCart className="h-4 w-4 mr-1" />
-                Cart
+                {addingToCart ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ShoppingCart className="h-4 w-4 mr-1" />}
+                {addingToCart ? "Added!" : "Cart"}
               </Button>
             </>
           ) : (
