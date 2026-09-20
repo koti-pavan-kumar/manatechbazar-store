@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,6 +13,8 @@ import {
   Eye, EyeOff, Loader2, ShoppingBag, ArrowRight, Sparkles, Star, Truck, Shield,
   CheckCircle2, Phone, ArrowLeft, ShieldCheck, KeyRound,
 } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
 
 const productImages = [
   "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=600&q=80",
@@ -40,10 +42,12 @@ export default function RegisterPage() {
   const [verifyCode, setVerifyCode] = useState(["", "", "", "", "", ""]);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyError, setVerifyError] = useState("");
-  const [codeSent, setCodeSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
-  const [devOTP, setDevOTP] = useState(""); // Shows OTP in dev mode
   const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Firebase state
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   // Store form data for step 2
   const [formData, setFormData] = useState<any>(null);
@@ -61,32 +65,65 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  // Step 1: Submit details → send OTP
+  // Setup invisible reCAPTCHA
+  const setupRecaptcha = useCallback(async () => {
+    if (recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current.clear();
+    }
+    const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+    });
+    recaptchaVerifierRef.current = verifier;
+    return verifier;
+  }, []);
+
+  // Step 1: Submit details → send OTP via Firebase
   const onSubmitDetails = async (data: any) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("/api/auth/send-otp", {
+      // Normalize phone
+      let phone = data.phone.replace(/[\s\-]/g, "");
+      if (!phone.startsWith("+91")) {
+        if (phone.startsWith("91") && phone.length === 12) {
+          phone = "+91" + phone.slice(2);
+        } else {
+          phone = "+91" + phone;
+        }
+      }
+
+      // Check if phone already exists
+      const checkRes = await fetch("/api/auth/check-phone", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: data.phone, type: "REGISTER" }),
+        body: JSON.stringify({ phone: data.phone }),
       });
-      const result = await res.json();
-
-      if (!res.ok) {
-        setError(result.error || "Failed to send OTP");
+      const checkResult = await checkRes.json();
+      if (checkResult.exists) {
+        setError("An account with this phone number already exists");
+        setLoading(false);
         return;
       }
 
+      // Setup reCAPTCHA and send OTP via Firebase
+      const verifier = await setupRecaptcha();
+      const result = await signInWithPhoneNumber(auth, phone, verifier);
+
       setFormData(data);
-      setVerifyPhone(data.phone);
-      setCodeSent(true);
+      setVerifyPhone(phone);
+      setConfirmationResult(result);
       setCountdown(60);
-      setDevOTP(result.otp || ""); // Dev mode shows OTP
       setStep("verify");
       setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
-    } catch {
-      setError("Something went wrong. Please try again.");
+    } catch (err: any) {
+      console.error("Firebase OTP error:", err);
+      if (err.code === "auth/too-many-requests") {
+        setError("Too many attempts. Please try again later.");
+      } else if (err.code === "auth/invalid-phone-number") {
+        setError("Invalid phone number. Please check and try again.");
+      } else {
+        setError("Failed to send OTP. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
@@ -104,25 +141,26 @@ export default function RegisterPage() {
         return;
       }
 
-      // Verify OTP
-      const verifyRes = await fetch("/api/auth/verify-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: verifyPhone, code, type: "REGISTER" }),
-      });
-      const verifyResult = await verifyRes.json();
-
-      if (!verifyRes.ok) {
-        setVerifyError(verifyResult.error || "Invalid OTP");
+      if (!confirmationResult) {
+        setVerifyError("Session expired. Please go back and try again.");
         setVerifyLoading(false);
         return;
       }
+
+      // Verify OTP with Firebase
+      await confirmationResult.confirm(code);
 
       // OTP verified — create account
       const registerRes = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email || undefined,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+        }),
       });
       const registerResult = await registerRes.json();
 
@@ -144,8 +182,16 @@ export default function RegisterPage() {
       } else {
         window.location.href = "/";
       }
-    } catch {
-      setVerifyError("Something went wrong. Please try again.");
+    } catch (err: any) {
+      console.error("Verify OTP error:", err);
+      if (err.code === "auth/invalid-verification-code") {
+        setVerifyError("Invalid OTP code. Please check and try again.");
+      } else if (err.code === "auth/code-expired") {
+        setVerifyError("OTP expired. Please request a new one.");
+      } else {
+        setVerifyError("Verification failed. Please try again.");
+      }
+    } finally {
       setVerifyLoading(false);
     }
   };
@@ -184,26 +230,25 @@ export default function RegisterPage() {
     }
   };
 
+  // Resend OTP
   const handleResend = async () => {
     if (countdown > 0) return;
     setVerifyError("");
     try {
-      const res = await fetch("/api/auth/send-otp", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone: verifyPhone, type: "REGISTER" }),
-      });
-      const result = await res.json();
+      const verifier = await setupRecaptcha();
+      const result = await signInWithPhoneNumber(auth, verifyPhone, verifier);
+      setConfirmationResult(result);
       setCountdown(60);
-      setCodeSent(true);
-      if (result.otp) setDevOTP(result.otp);
     } catch {
-      setVerifyError("Failed to resend OTP");
+      setVerifyError("Failed to resend OTP. Please try again.");
     }
   };
 
   return (
     <div className="min-h-dvh flex bg-background">
+      {/* Hidden reCAPTCHA container */}
+      <div id="recaptcha-container" />
+
       {/* ─── Left Panel: Visual / Branding ──────────────────── */}
       <div className="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-pink-500/10 to-orange-400/10 animate-gradient" />
@@ -369,7 +414,7 @@ export default function RegisterPage() {
           {step === "verify" && (
             <>
               <div className="mb-6">
-                <button onClick={() => { setStep("details"); setVerifyCode(["", "", "", "", "", ""]); setVerifyError(""); setDevOTP(""); }} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+                <button onClick={() => { setStep("details"); setVerifyCode(["", "", "", "", "", ""]); setVerifyError(""); }} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
                 <div className="flex items-center gap-2 mb-3">
@@ -381,12 +426,11 @@ export default function RegisterPage() {
                 <h2 className="text-3xl font-bold tracking-tight">Verify your phone</h2>
                 <p className="text-muted-foreground mt-2">
                   We sent a 6-digit OTP to<br />
-                  <span className="font-semibold text-foreground">+91 {verifyPhone}</span>
+                  <span className="font-semibold text-foreground">{verifyPhone}</span>
                 </p>
               </div>
 
               <div className="bg-card rounded-2xl border shadow-lg p-6 sm:p-8 transition-all duration-300 hover:shadow-xl">
-                {/* Shield icon */}
                 <div className="flex justify-center mb-6">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-green-500/25">
                     <ShieldCheck className="h-8 w-8 text-white" />
@@ -402,15 +446,6 @@ export default function RegisterPage() {
                   </div>
                 )}
 
-                {/* Dev mode OTP display */}
-                {devOTP && (
-                  <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm flex items-center gap-2 mb-4">
-                    <span className="text-xs">📱 Dev mode OTP:</span>
-                    <span className="font-mono font-bold text-lg">{devOTP}</span>
-                  </div>
-                )}
-
-                {/* Code inputs */}
                 <div className="flex justify-center gap-3 mb-6">
                   {verifyCode.map((digit, i) => (
                     <input
@@ -431,7 +466,7 @@ export default function RegisterPage() {
 
                 <p className="text-xs text-center text-muted-foreground mb-4">
                   <KeyRound className="h-3 w-3 inline mr-1" />
-                  Code expires in 10 minutes
+                  Code expires in 5 minutes
                 </p>
 
                 <Button onClick={handleVerifyCode} size="lg" className="w-full h-12 rounded-xl font-semibold text-base transition-all duration-300 hover:shadow-lg hover:shadow-primary/25" disabled={verifyLoading || verifyCode.join("").length !== 6}>
@@ -442,7 +477,6 @@ export default function RegisterPage() {
                   )}
                 </Button>
 
-                {/* Resend code */}
                 <div className="text-center mt-4">
                   {countdown > 0 ? (
                     <p className="text-sm text-muted-foreground">
