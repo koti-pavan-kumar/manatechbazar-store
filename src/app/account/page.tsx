@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import {
   User, Package, MapPin, LogOut, ChevronRight, Plus, Edit, Trash2, Loader2,
   Shield, Mail, Phone, Heart, Settings, Headphones, ShoppingBag, CreditCard,
-  Truck, Star, Calendar, TrendingUp, ExternalLink, Instagram, MessageCircle,
+  Truck, Star, Calendar, TrendingUp, ExternalLink, Camera, MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -174,7 +174,7 @@ export default function AccountPage() {
         <a href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="group">
           <div className="bg-white rounded-2xl border border-gray-100 p-4 text-center hover:shadow-lg hover:border-pink-200 hover:-translate-y-0.5 transition-all duration-200 cursor-pointer">
             <div className="w-12 h-12 mx-auto rounded-2xl bg-gradient-to-br from-pink-50 to-orange-50 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
-              <Instagram className="h-5 w-5 text-pink-500" />
+              <Camera className="h-5 w-5 text-pink-500" />
             </div>
             <p className="text-sm font-bold text-gray-900">Instagram</p>
             <p className="text-[11px] text-gray-500">Follow us</p>
