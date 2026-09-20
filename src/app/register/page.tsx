@@ -11,11 +11,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Eye, EyeOff, Loader2, ShoppingBag, ArrowRight, Sparkles, Star, Truck, Shield,
-  CheckCircle2, Mail, ArrowLeft, ShieldCheck, KeyRound,
+  CheckCircle2, Phone, ArrowLeft, ShieldCheck, KeyRound,
 } from "lucide-react";
-import { Instagram } from "@/components/ui/icon-instagram";
-
-const INSTAGRAM_URL = "https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==";
 
 const productImages = [
   "https://images.unsplash.com/photo-1560343090-f0409e92791a?w=600&q=80",
@@ -32,28 +29,26 @@ const benefits = [
 ];
 
 export default function RegisterPage() {
-  // Step management: "details" → "verify" → "done"
   const [step, setStep] = useState<"details" | "verify">("details");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // Verification state
-  const [verifyEmail, setVerifyEmail] = useState("");
+  // OTP state
+  const [verifyPhone, setVerifyPhone] = useState("");
   const [verifyCode, setVerifyCode] = useState(["", "", "", "", "", ""]);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyError, setVerifyError] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
+  const [devOTP, setDevOTP] = useState(""); // Shows OTP in dev mode
   const codeInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   // Store form data for step 2
   const [formData, setFormData] = useState<any>(null);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   // Countdown timer for resend
   useEffect(() => {
@@ -66,31 +61,29 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  // Step 1: Submit registration details → send verification code
+  // Step 1: Submit details → send OTP
   const onSubmitDetails = async (data: any) => {
     setLoading(true);
     setError("");
     try {
-      // First, send verification code
-      const verifyRes = await fetch("/api/auth/send-verification", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email, type: "REGISTER" }),
+        body: JSON.stringify({ phone: data.phone, type: "REGISTER" }),
       });
-      const verifyResult = await verifyRes.json();
+      const result = await res.json();
 
-      if (!verifyRes.ok) {
-        setError(verifyResult.error || "Failed to send verification code");
+      if (!res.ok) {
+        setError(result.error || "Failed to send OTP");
         return;
       }
 
       setFormData(data);
-      setVerifyEmail(data.email);
+      setVerifyPhone(data.phone);
       setCodeSent(true);
-      setCountdown(60); // 60s cooldown for resend
+      setCountdown(60);
+      setDevOTP(result.otp || ""); // Dev mode shows OTP
       setStep("verify");
-
-      // Focus first code input
       setTimeout(() => codeInputRefs.current[0]?.focus(), 100);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -99,7 +92,7 @@ export default function RegisterPage() {
     }
   };
 
-  // Step 2: Verify code → complete registration
+  // Step 2: Verify OTP → create account
   const handleVerifyCode = async () => {
     setVerifyLoading(true);
     setVerifyError("");
@@ -111,21 +104,21 @@ export default function RegisterPage() {
         return;
       }
 
-      // Verify the code
-      const verifyRes = await fetch("/api/auth/verify-email", {
+      // Verify OTP
+      const verifyRes = await fetch("/api/auth/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: verifyEmail, code, type: "REGISTER" }),
+        body: JSON.stringify({ phone: verifyPhone, code, type: "REGISTER" }),
       });
       const verifyResult = await verifyRes.json();
 
       if (!verifyRes.ok) {
-        setVerifyError(verifyResult.error || "Invalid code");
+        setVerifyError(verifyResult.error || "Invalid OTP");
         setVerifyLoading(false);
         return;
       }
 
-      // Code verified — now create the account
+      // OTP verified — create account
       const registerRes = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -139,7 +132,7 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto-login after successful registration
+      // Auto-login
       const signInResult = await signIn("credentials", {
         phone: formData.phone,
         password: formData.password,
@@ -161,23 +154,15 @@ export default function RegisterPage() {
   const handleCodeChange = (index: number, value: string) => {
     if (value.length > 1) value = value.slice(-1);
     if (!/^\d*$/.test(value)) return;
-
     const newCode = [...verifyCode];
     newCode[index] = value;
     setVerifyCode(newCode);
-
-    // Auto-focus next input
-    if (value && index < 5) {
-      codeInputRefs.current[index + 1]?.focus();
-    }
-
-    // Auto-submit when all 6 digits entered
+    if (value && index < 5) codeInputRefs.current[index + 1]?.focus();
     if (newCode.every((d) => d !== "") && newCode.join("").length === 6) {
       setTimeout(() => handleVerifyCode(), 100);
     }
   };
 
-  // Handle backspace in code inputs
   const handleCodeKeyDown = (index: number, e: React.KeyboardEvent) => {
     if (e.key === "Backspace" && !verifyCode[index] && index > 0) {
       codeInputRefs.current[index - 1]?.focus();
@@ -187,7 +172,6 @@ export default function RegisterPage() {
     }
   };
 
-  // Handle paste
   const handleCodePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
     const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
@@ -196,26 +180,25 @@ export default function RegisterPage() {
       setVerifyCode(newCode);
       const nextEmpty = newCode.findIndex((d) => !d);
       codeInputRefs.current[nextEmpty === -1 ? 5 : nextEmpty]?.focus();
-      if (pasted.length === 6) {
-        setTimeout(() => handleVerifyCode(), 100);
-      }
+      if (pasted.length === 6) setTimeout(() => handleVerifyCode(), 100);
     }
   };
 
-  // Resend code
   const handleResend = async () => {
     if (countdown > 0) return;
     setVerifyError("");
     try {
-      await fetch("/api/auth/send-verification", {
+      const res = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: verifyEmail, type: "REGISTER" }),
+        body: JSON.stringify({ phone: verifyPhone, type: "REGISTER" }),
       });
+      const result = await res.json();
       setCountdown(60);
       setCodeSent(true);
+      if (result.otp) setDevOTP(result.otp);
     } catch {
-      setVerifyError("Failed to resend code");
+      setVerifyError("Failed to resend OTP");
     }
   };
 
@@ -268,11 +251,6 @@ export default function RegisterPage() {
                 </div>
               ))}
             </div>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-pink-500 to-orange-500 text-white font-medium hover:shadow-lg hover:shadow-pink-500/25 transition-all duration-300 hover:scale-105">
-              <Instagram className="h-5 w-5" />
-              Follow @manatechbazar
-              <ArrowRight className="h-4 w-4" />
-            </a>
           </div>
           <div className={`absolute bottom-8 left-0 right-0 flex items-center justify-center gap-6 text-white/40 text-xs transition-all duration-1000 delay-700 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
             <div className="flex items-center gap-1.5"><Truck className="h-3.5 w-3.5" /><span>Free Shipping ₹499+</span></div>
@@ -337,7 +315,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email <span className="text-muted-foreground">(optional)</span></Label>
+                    <Label htmlFor="email" className="text-sm font-medium">Email <span className="text-muted-foreground text-xs">(optional)</span></Label>
                     <Input id="email" type="email" placeholder="you@example.com" className="h-12 rounded-xl border-2 transition-all duration-200 focus:border-primary focus:ring-0" {...register("email")} />
                     {errors.email && <p className="text-xs text-red-500">{errors.email.message as string}</p>}
                   </div>
@@ -361,9 +339,9 @@ export default function RegisterPage() {
 
                   <Button type="submit" size="lg" className="w-full h-12 rounded-xl font-semibold text-base transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] mt-2" disabled={loading}>
                     {loading ? (
-                      <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Sending verification code...</>
+                      <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Sending OTP...</>
                     ) : (
-                      <>Continue to Verification <ArrowRight className="h-4 w-4 ml-2" /></>
+                      <>Verify Phone Number <ArrowRight className="h-4 w-4 ml-2" /></>
                     )}
                   </Button>
                 </form>
@@ -387,23 +365,23 @@ export default function RegisterPage() {
             </>
           )}
 
-          {/* ─── STEP 2: Email Verification ─── */}
+          {/* ─── STEP 2: Phone OTP Verification ─── */}
           {step === "verify" && (
             <>
               <div className="mb-6">
-                <button onClick={() => { setStep("details"); setVerifyCode(["", "", "", "", "", ""]); setVerifyError(""); }} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+                <button onClick={() => { setStep("details"); setVerifyCode(["", "", "", "", "", ""]); setVerifyError(""); setDevOTP(""); }} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
                   <ArrowLeft className="h-4 w-4" /> Back
                 </button>
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-8 h-8 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
-                    <Mail className="h-4 w-4 text-green-600" />
+                    <Phone className="h-4 w-4 text-green-600" />
                   </div>
                   <span className="text-sm font-medium text-green-600">Step 2 of 2</span>
                 </div>
-                <h2 className="text-3xl font-bold tracking-tight">Check your email</h2>
+                <h2 className="text-3xl font-bold tracking-tight">Verify your phone</h2>
                 <p className="text-muted-foreground mt-2">
-                  We sent a 6-digit code to<br />
-                  <span className="font-semibold text-foreground">{verifyEmail}</span>
+                  We sent a 6-digit OTP to<br />
+                  <span className="font-semibold text-foreground">+91 {verifyPhone}</span>
                 </p>
               </div>
 
@@ -421,6 +399,14 @@ export default function RegisterPage() {
                       <span className="text-red-600 text-xs font-bold">!</span>
                     </div>
                     {verifyError}
+                  </div>
+                )}
+
+                {/* Dev mode OTP display */}
+                {devOTP && (
+                  <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm flex items-center gap-2 mb-4">
+                    <span className="text-xs">📱 Dev mode OTP:</span>
+                    <span className="font-mono font-bold text-lg">{devOTP}</span>
                   </div>
                 )}
 
@@ -460,11 +446,11 @@ export default function RegisterPage() {
                 <div className="text-center mt-4">
                   {countdown > 0 ? (
                     <p className="text-sm text-muted-foreground">
-                      Resend code in <span className="font-semibold text-foreground">{countdown}s</span>
+                      Resend OTP in <span className="font-semibold text-foreground">{countdown}s</span>
                     </p>
                   ) : (
                     <button onClick={handleResend} className="text-sm text-primary font-semibold hover:underline">
-                      Didn&apos;t receive the code? Resend
+                      Didn&apos;t receive the OTP? Resend
                     </button>
                   )}
                 </div>

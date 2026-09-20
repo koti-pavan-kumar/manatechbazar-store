@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validations";
-import { isEmailVerified } from "@/lib/verification";
+// Email verification removed — phone OTP is used instead
 import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
@@ -36,6 +36,8 @@ export async function POST(req: NextRequest) {
     if (normalizedPhone.startsWith("+91")) normalizedPhone = normalizedPhone.slice(3);
     if (normalizedPhone.startsWith("91") && normalizedPhone.length === 12) normalizedPhone = normalizedPhone.slice(2);
 
+    // Note: Phone OTP verification happens BEFORE this API is called.
+    // The client sends verify-otp request first, then calls register.
     // Check existing user by phone
     const existing = await db.user.findUnique({ where: { phone: normalizedPhone } });
     if (existing) {
@@ -49,7 +51,7 @@ export async function POST(req: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Generate email from phone if not provided
-    const userEmail = email || `${normalizedPhone}@manatechbazar.in`;
+    const userEmail = (email && email.trim()) ? email.trim() : `${normalizedPhone}@manatechbazar.in`;
 
     // Create user
     const user = await db.user.create({
