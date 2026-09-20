@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/product/product-card";
 import { formatPrice, safeJsonParse } from "@/lib/utils";
-import { ArrowRight, Clock, Flame, Zap, Star, ChevronLeft, ChevronRight, Sparkles, ShoppingBag } from "lucide-react";
+import { ArrowRight, Clock, Flame, Zap, Star, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 
 // ─── Types ─────────────────────────────────────────────
 interface HomeData {
@@ -23,29 +23,21 @@ interface HomeData {
 const heroSlides = [
   {
     title: "Trendy Gadgets",
-    subtitle: "Style meets technology",
-    description: "Sunglasses, watches, earbuds, speakers & more — all at unbeatable prices!",
     category: "gadgets",
     image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893576/hzhszbzy8nhh5awjn9ph.png",
   },
   {
     title: "Home & Kitchen",
-    subtitle: "Smart living essentials",
-    description: "Spoons, lighters, gas stoves & trendy kitchen gadgets you'll love!",
     category: "home-kitchen",
     image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893632/mwbzdbixtvwc7rcb6laz.png",
   },
   {
     title: "Jewellery & Fashion",
-    subtitle: "Elegance redefined",
-    description: "Gold plated earrings, necklaces, bangles & stunning jewellery for every occasion!",
     category: "jewellery",
     image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893601/gahsnav4taz0tvlzw2ev.png",
   },
   {
     title: "Toys & Games",
-    subtitle: "Fun for every age",
-    description: "Rubik's cubes, RC cars, puzzles, teddy bears & everything kids love!",
     category: "toys-games",
     image: "https://res.cloudinary.com/j8ly7tsg/image/upload/v1789893668/kqugkrx0fet1saqhosau.png",
   },
@@ -140,10 +132,6 @@ export function HomeContent({ data }: { data: HomeData }) {
             <div className="absolute inset-0 flex items-center">
               <div className="mx-auto max-w-7xl w-full px-6 sm:px-8">
                 <div key={currentSlide} className="max-w-xl space-y-4 sm:space-y-5 animate-fade-in-up">
-                  <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md border border-white/25 rounded-full px-4 py-1.5">
-                    <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
-                    <span className="text-white/95 text-sm font-medium">{slide.subtitle}</span>
-                  </div>
                   <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-white leading-[1.05] tracking-tight">
                     {slide.title.includes("&") ? (
                       <>
@@ -155,9 +143,6 @@ export function HomeContent({ data }: { data: HomeData }) {
                       ))}</>
                     )}
                   </h1>
-                  <p className="text-base sm:text-lg lg:text-xl text-white/85 max-w-md leading-relaxed">
-                    {slide.description}
-                  </p>
                   <div className="pt-2">
                     <span className="inline-flex items-center gap-2 h-12 sm:h-14 px-8 sm:px-10 font-bold rounded-2xl bg-white text-gray-900 shadow-2xl transition-all duration-300 group-hover:scale-105 text-sm sm:text-base">
                       <ShoppingBag className="h-5 w-5" /> Shop Now <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
