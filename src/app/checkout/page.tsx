@@ -21,7 +21,7 @@ import { CreditCard, Banknote, Loader2, Check, Plus } from "lucide-react";
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Cashfree: any;
   }
 }
 
@@ -129,7 +129,7 @@ export default function CheckoutPage() {
           alert(data.error || "Failed to place order");
         }
       } else {
-        // Razorpay flow
+        // Cashfree payment flow
         const res = await fetch("/api/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -157,23 +157,17 @@ export default function CheckoutPage() {
           return;
         }
 
-        // Open Razorpay checkout
-        const options = {
-          key: data.razorpayKeyId,
-          amount: data.amount,
-          currency: "INR",
-          name: STORE.name,
-          order_id: data.razorpayOrderId,
-          handler: async function (response: any) {
-            // Verify payment
-            const verifyRes = await fetch("/api/razorpay/verify", {
+        // Open Cashfree checkout
+        const cashfree = new window.Cashfree({
+          mode: "production",
+          onClick: async function (paymentDetails: any) {
+            // Payment initiated — verify with our server
+            const verifyRes = await fetch("/api/cashfree/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
                 orderId: data.internalOrderId,
+                cfOrderId: data.cashfreeOrderId,
               }),
             });
             const verifyData = await verifyRes.json();
@@ -184,22 +178,23 @@ export default function CheckoutPage() {
               alert("Payment verification failed. Please contact support.");
             }
           },
-          prefill: {
-            name: (session?.user as any)?.name || "",
-            email: session?.user?.email || "",
+          onError: function (error: any) {
+            console.error("Cashfree error:", error);
+            setLoading(false);
           },
-          theme: { color: "#1a1a1a" },
-          modal: {
-            ondismiss: function () {
-              setLoading(false);
-            },
-            confirm_close: true,
+          style: {
+            backgroundColor: "#ffffff",
+            color: "#000000",
+            fontFamily: "Inter, sans-serif",
+            fontSize: "14px",
+            borderRadius: "12px",
           },
-          notes: { checkout_domain: "manatechbazar.in" },
-        };
+        });
 
-        const rzp = new window.Razorpay(options);
-        rzp.open();
+        cashfree.checkout({
+          paymentSessionId: data.cashfreeSessionId,
+          redirectTarget: "_self",
+        });
       }
     } catch (error: any) {
       alert(error.message || "Something went wrong");
@@ -210,7 +205,7 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+      <script src="https://sdk.cashfree.com/js/v3/checkout.js" async />
       <div className="mx-auto max-w-3xl px-4 py-6">
         <h1 className="text-2xl font-bold mb-6">Checkout</h1>
 
@@ -291,7 +286,7 @@ export default function CheckoutPage() {
                   <CreditCard className="h-5 w-5 text-blue-600" />
                   <div>
                     <p className="font-medium">Online Payment (UPI / Cards / Wallets)</p>
-                    <p className="text-xs text-muted-foreground">Pay securely via Razorpay</p>
+                    <p className="text-xs text-muted-foreground">Pay securely via Cashfree (UPI, Cards, Net Banking)</p>
                   </div>
                 </label>
                 <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">

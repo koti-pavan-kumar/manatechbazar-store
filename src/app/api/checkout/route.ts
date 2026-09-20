@@ -4,12 +4,7 @@ import { db } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
 import { sendOrderConfirmation } from "@/lib/email";
 import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
-import Razorpay from "razorpay";
-
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+import { cashfree, CASHFREE_API_VERSION } from "@/lib/cashfree";
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -121,12 +116,32 @@ export async function POST(req: NextRequest) {
     const orderNumber = generateOrderNumber();
 
     if (paymentMode === "RAZORPAY") {
-      // Create Razorpay order
-      const razorpayOrder = await razorpay.orders.create({
-        amount: total, // amount in paise
-        currency: "INR",
-        receipt: orderNumber,
-      });
+      // Create Cashfree payment session
+      const cfOrderId = `cf_${orderNumber}`;
+      const customerPhone = address.phone || "9999999999";
+      const customerEmail = `${customerPhone}@manatechbazar.in`;
+
+      const cashfreeOrderRequest = {
+        order_id: cfOrderId,
+        order_amount: total / 100, // Cashfree expects amount in rupees, not paise
+        order_currency: "INR",
+        customer_details: {
+          customer_id: String(userId),
+          customer_phone: customerPhone,
+          customer_email: customerEmail,
+        },
+        order_meta: {
+          return_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://manatechbazar.in"}/orders/{order_id}?payment_status=success`,
+          webhook_url: `${process.env.NEXT_PUBLIC_BASE_URL || "https://manatechbazar.in"}/api/cashfree/webhook`,
+        },
+      };
+
+      const cashfreeResponse = await (cashfree as any).PGCreateOrder(CASHFREE_API_VERSION, cashfreeOrderRequest);
+      const sessionId = cashfreeResponse.data?.cf_session_id;
+
+      if (!sessionId) {
+        return NextResponse.json({ error: "Failed to create payment session" }, { status: 500 });
+      }
 
       // Create internal order in PENDING state
       const order = await db.order.create({
@@ -137,7 +152,7 @@ export async function POST(req: NextRequest) {
           status: "PLACED",
           paymentMode: "RAZORPAY",
           paymentStatus: "PENDING",
-          razorpayOrderId: razorpayOrder.id,
+          razorpayOrderId: cfOrderId,
           subtotal,
           discount: couponDiscount,
           shippingCharges: shipping,
@@ -162,8 +177,8 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-        razorpayOrderId: razorpayOrder.id,
+        cashfreeSessionId: sessionId,
+        cashfreeOrderId: cfOrderId,
         internalOrderId: order.id,
         amount: total,
       });
