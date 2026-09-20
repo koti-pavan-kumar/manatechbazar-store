@@ -26,21 +26,21 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Checkout requires auth
+  // Checkout requires auth — send to register (new users) or login (existing)
   if (pathname === "/checkout") {
     if (!token) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", "/checkout");
-      return NextResponse.redirect(loginUrl);
+      const registerUrl = new URL("/register", request.url);
+      registerUrl.searchParams.set("callbackUrl", "/checkout");
+      return NextResponse.redirect(registerUrl);
     }
   }
 
-  // Account and orders require auth
+  // Account and orders require auth — send to register
   if (pathname === "/account" || pathname.startsWith("/orders")) {
     if (!token) {
-      const loginUrl = new URL("/login", request.url);
-      loginUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(loginUrl);
+      const registerUrl = new URL("/register", request.url);
+      registerUrl.searchParams.set("callbackUrl", pathname);
+      return NextResponse.redirect(registerUrl);
     }
   }
 
