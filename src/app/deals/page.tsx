@@ -1,6 +1,8 @@
 import { db } from "@/lib/prisma";
 import { DealsContent } from "./deals-content";
 
+export const revalidate = 60;
+
 interface Props {
   searchParams: Promise<{ max?: string }>;
 }

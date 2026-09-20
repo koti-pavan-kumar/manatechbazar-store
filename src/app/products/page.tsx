@@ -2,6 +2,8 @@ import { db } from "@/lib/prisma";
 import { ProductsContent } from "./products-content";
 import type { Metadata } from "next";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Shop All Products",
   description: "Browse our complete collection of products. Filter by category, price, and more.",

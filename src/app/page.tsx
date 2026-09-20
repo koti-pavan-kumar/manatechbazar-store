@@ -4,6 +4,8 @@ import { HomeContent } from "@/components/home-content";
 import { StoreLayout } from "@/components/layout/store-layout";
 import type { Metadata } from "next";
 
+export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "Mana Tech Bazar — Your Favourite Store | Shop the Best Deals",
   description:
@@ -39,6 +41,7 @@ async function getHomeData() {
       db.product.findMany({
         where: { isActive: true },
         orderBy: { createdAt: "desc" },
+        take: 40,
       }),
     ]);
 

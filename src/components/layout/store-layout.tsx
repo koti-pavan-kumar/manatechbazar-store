@@ -3,8 +3,8 @@
 import { Header } from "./header";
 import { Footer } from "./footer";
 import { BottomNav } from "./bottom-nav";
-import { WhatsAppButton } from "./whatsapp-button";
-import { ChatWidget } from "@/components/chat-widget";
+import { WhatsAppButtonLazy } from "./whatsapp-button-lazy";
+import { ChatWidgetLazy } from "@/components/chat-widget-lazy";
 import { NavLoading } from "@/components/nav-loading";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
@@ -15,8 +15,8 @@ export function StoreLayout({ children }: { children: React.ReactNode }) {
       <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">{children}</main>
       <Footer />
       <BottomNav />
-      <WhatsAppButton />
-      <ChatWidget />
+      <WhatsAppButtonLazy />
+      <ChatWidgetLazy />
     </div>
   );
 }
