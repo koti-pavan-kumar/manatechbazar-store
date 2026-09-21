@@ -156,8 +156,10 @@ export default function WishlistPage() {
             </div>
             <div className="flex items-center gap-4 animate-slide-in-left">
               <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
-                <p className="text-xs text-white/70 uppercase tracking-wider font-medium">You Save</p>
-                <p className="text-2xl font-extrabold text-yellow-300">{formatPrice(totalSaved)}</p>
+                <p className="text-xs text-white/70 uppercase tracking-wider font-medium">Total Savings</p>
+                <p className="text-xs text-white/50 line-through mb-0.5">{formatPrice(items.reduce((sum, item) => sum + item.mrp, 0))} MRP</p>
+                <p className="text-2xl font-extrabold text-green-300">-{formatPrice(totalSaved)}</p>
+                <p className="text-[10px] text-white/60 mt-0.5">You&apos;re saving on {items.length} item{items.length !== 1 ? 's' : ''}!</p>
               </div>
             </div>
           </div>
