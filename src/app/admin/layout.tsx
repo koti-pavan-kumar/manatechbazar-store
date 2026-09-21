@@ -94,6 +94,15 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <ExternalLink className="h-4 w-4" />
           View Store
         </Link>
+        <button
+          onClick={() => {
+            import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/login" }));
+          }}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-red-400/80 hover:text-red-400 hover:bg-red-500/10 transition-all min-h-[44px] w-full"
+        >
+          <LogOut className="h-4 w-4" />
+          Logout
+        </button>
       </div>
     </div>
   );
@@ -121,9 +130,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="h-5 w-5" />
             </button>
             <span className="font-bold text-sm">Mana Tech Bazar — Admin</span>
-            <Link href="/" className="min-h-[44px] min-w-[44px] flex items-center justify-center text-xs text-muted-foreground rounded-lg hover:bg-muted transition-colors">
-              Store
-            </Link>
+            <div className="flex items-center gap-1">
+              <Link href="/" className="min-h-[44px] min-w-[44px] flex items-center justify-center text-xs text-muted-foreground rounded-lg hover:bg-muted transition-colors">
+                Store
+              </Link>
+              <button
+                onClick={() => {
+                  import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/login" }));
+                }}
+                className="min-h-[44px] min-w-[44px] flex items-center justify-center text-xs text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-950 transition-colors"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+              </button>
+            </div>
           </header>
 
           {/* Mobile Sidebar Overlay */}
