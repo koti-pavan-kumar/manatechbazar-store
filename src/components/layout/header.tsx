@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, ShoppingCart, Heart, Menu, User } from "lucide-react";
+import { ShoppingCart, Heart, Menu, User, Search } from "lucide-react";
 import { Instagram } from "@/components/ui/icon-instagram";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +11,8 @@ import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
 import { useSession, signIn } from "next-auth/react";
 import { LayoutDashboard } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const totalItems = useCartStore((s) => s.getTotalItems());
@@ -24,6 +25,9 @@ export function Header() {
   const [adminPassword, setAdminPassword] = useState("");
   const [adminError, setAdminError] = useState("");
   const [adminLoading, setAdminLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,12 +130,6 @@ export function Header() {
               </Button>
             )}
 
-            <Link href="/products" aria-label="Search">
-              <Button variant="ghost" size="icon" className="hidden sm:flex">
-                <Search className="h-5 w-5" />
-              </Button>
-            </Link>
-
             <Link href="/wishlist" aria-label="Wishlist" className="relative">
               <Button variant="ghost" size="icon">
                 <Heart className="h-5 w-5" />
@@ -154,6 +152,31 @@ export function Header() {
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Full-width search bar below nav */}
+        <div className="border-t bg-background">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (searchQuery.trim()) {
+                router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+              }
+            }}
+            className="mx-auto max-w-7xl px-4"
+          >
+            <div className="relative flex items-center">
+              <Search className="absolute left-3 h-5 w-5 text-muted-foreground pointer-events-none" />
+              <input
+                ref={searchRef}
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-11 pl-11 pr-4 text-sm rounded-xl border bg-muted/50 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+              />
+            </div>
+          </form>
         </div>
 
         {/* Mobile Menu Dropdown */}
