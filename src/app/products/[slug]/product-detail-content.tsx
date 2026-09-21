@@ -2,12 +2,12 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
   Heart, ShoppingCart, Star, Truck, Shield, ChevronLeft, MessageCircle,
-  Minus, Plus, Share2, ChevronRight, Pencil, Trash2, Eye, EyeOff, Loader2, Zap,
+  Minus, Plus, Share2, ChevronRight, Pencil, Trash2, Eye, EyeOff, Loader2, Zap, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ import { formatPrice, calcDiscount, safeJsonParse } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -56,7 +57,9 @@ export function ProductDetailContent({ product, related }: Props) {
   const toggleWishlist = useWishlistStore((s) => s.toggleItem);
   const isInWishlist = useWishlistStore((s) => s.isInWishlist(product.id));
 
-  const handleAddToCart = () => {
+  const [addedToCart, setAddedToCart] = useState(false);
+
+  const handleAddToCart = useCallback(() => {
     addItem({
       id: product.id,
       title: product.title,
@@ -71,7 +74,13 @@ export function ProductDetailContent({ product, related }: Props) {
         ? [selectedVariant.size, selectedVariant.color].filter(Boolean).join(" / ")
         : undefined,
     }, quantity);
-  };
+    setAddedToCart(true);
+    toast.success(`${product.title} added to cart!`, {
+      duration: 2500,
+      icon: <ShoppingCart className="h-4 w-4" />,
+    });
+    setTimeout(() => setAddedToCart(false), 2000);
+  }, [addItem, product, currentPrice, currentStock, selectedVariant, quantity]);
 
   const handleBuyNow = () => {
     handleAddToCart();
@@ -351,8 +360,21 @@ export function ProductDetailContent({ product, related }: Props) {
                 <Button size="lg" className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white" onClick={handleBuyNow}>
                   ⚡ Buy Now
                 </Button>
-                <Button size="lg" variant="outline" onClick={handleAddToCart}>
-                  <ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart
+                <Button
+                  size="lg"
+                  onClick={handleAddToCart}
+                  className={cn(
+                    "transition-all duration-300",
+                    addedToCart
+                      ? "bg-green-500 text-white hover:bg-green-600 border-green-500"
+                      : ""
+                  )}
+                >
+                  {addedToCart ? (
+                    <><Check className="h-5 w-5 mr-2" /> Added!</>
+                  ) : (
+                    <><ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart</>
+                  )}
                 </Button>
                 <Button size="lg" variant="outline" onClick={handleWishlist}>
                   <Heart className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
@@ -541,8 +563,17 @@ export function ProductDetailContent({ product, related }: Props) {
               <p className="text-xs text-muted-foreground truncate">{product.title}</p>
               <p className="font-bold text-sm">{formatPrice(currentPrice)}</p>
             </div>
-            <Button size="sm" onClick={handleAddToCart} className="px-3 h-10 rounded-xl font-semibold text-xs shrink-0">
-              <ShoppingCart className="h-4 w-4 mr-1" /> Cart
+            <Button
+              size="sm"
+              onClick={handleAddToCart}
+              className={cn(
+                "px-3 h-10 rounded-xl font-semibold text-xs shrink-0 transition-all duration-300",
+                addedToCart
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : ""
+              )}
+            >
+              {addedToCart ? <><Check className="h-4 w-4 mr-1" /> Added!</> : <><ShoppingCart className="h-4 w-4 mr-1" /> Cart</>}
             </Button>
             <Button size="sm" onClick={handleBuyNow} className="px-4 h-10 rounded-xl font-semibold text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shrink-0">
               ⚡ Buy Now

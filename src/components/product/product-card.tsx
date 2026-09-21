@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Eye, Zap } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Zap, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice, calcDiscount, safeJsonParse } from "@/lib/utils";
@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface ProductCardProps {
   product: {
@@ -45,7 +46,6 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const el = cardRef.current;
     if (!el) return;
-    // Disable tilt on mobile to prevent horizontal overflow
     if (window.innerWidth < 640) return;
     const rect = el.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -64,7 +64,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   }, []);
 
   const [buyingNow, setBuyingNow] = useState(false);
-  const [addingToCart, setAddingToCart] = useState(false);
+  const [addedToCart, setAddedToCart] = useState(false);
 
   const handleBuyNow = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -86,7 +86,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setAddingToCart(true);
+    setAddedToCart(true);
     addItem({
       id: product.id,
       title: product.title,
@@ -97,7 +97,11 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       stock: product.stock,
       freeShipping: product.freeShipping,
     });
-    setTimeout(() => setAddingToCart(false), 600);
+    toast.success(`${product.title} added to cart!`, {
+      duration: 2500,
+      icon: <ShoppingCart className="h-4 w-4" />,
+    });
+    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   const handleToggleWishlist = (e: React.MouseEvent) => {
@@ -182,11 +186,25 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
               <Button
                 size="sm"
                 onClick={handleAddToCart}
-                disabled={addingToCart}
-                className="h-10 rounded-xl bg-white text-gray-900 hover:bg-white/90 shadow-lg font-semibold text-xs px-3"
+                disabled={false}
+                className={cn(
+                  "h-10 rounded-xl shadow-lg font-semibold text-xs px-3 transition-all duration-300",
+                  addedToCart
+                    ? "bg-green-500 text-white hover:bg-green-600 scale-95"
+                    : "bg-white text-gray-900 hover:bg-white/90"
+                )}
               >
-                {addingToCart ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <ShoppingCart className="h-4 w-4 mr-1" />}
-                {addingToCart ? "Added!" : "Cart"}
+                {addedToCart ? (
+                  <>
+                    <Check className="h-4 w-4 mr-1 animate-bounce" />
+                    Added!
+                  </>
+                ) : (
+                  <>
+                    <ShoppingCart className="h-4 w-4 mr-1" />
+                    Cart
+                  </>
+                )}
               </Button>
             </>
           ) : (
