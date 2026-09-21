@@ -210,18 +210,6 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <div>
-                  <Label htmlFor="email">Email (optional — for order updates)</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="h-12 rounded-xl"
-                    disabled={step === "payment"}
-                    {...register("email")}
-                  />
-                </div>
-
                 <div className="border-t pt-4 mt-4">
                   <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                     <MapPin className="h-4 w-4" /> Delivery Address
