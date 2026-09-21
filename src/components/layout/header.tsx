@@ -183,6 +183,9 @@ export function Header() {
         {mobileMenuOpen && (
           <div className="lg:hidden border-t bg-background animate-slide-up">
             <nav className="px-4 py-4 space-y-2">
+              <Link href="/" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                🏠 Home
+              </Link>
               <Link href="/products" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
                 Shop All
               </Link>
