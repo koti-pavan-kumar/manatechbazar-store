@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema } from "@/lib/validations";
@@ -51,7 +51,14 @@ export function LoginForm() {
       if (result?.error) {
         setError("Invalid phone number or password");
       } else {
-        window.location.href = callbackUrl;
+        // Check user role to decide redirect destination
+        const sessionRes = await fetch("/api/auth/session");
+        const session = await sessionRes.json();
+        if (session?.user?.role === "ADMIN") {
+          window.location.href = "/admin";
+        } else {
+          window.location.href = callbackUrl;
+        }
       }
     } catch {
       setError("Something went wrong");

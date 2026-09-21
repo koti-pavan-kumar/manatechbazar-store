@@ -7,11 +7,15 @@ import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
+import { useSession } from "next-auth/react";
+import { LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 
 export function Header() {
   const totalItems = useCartStore((s) => s.getTotalItems());
   const wishlistCount = useWishlistStore((s) => s.items.length);
+  const { data: session } = useSession();
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -72,6 +76,15 @@ export function Header() {
         <div className="flex items-center gap-1">
           <ThemeToggle />
 
+          {/* Admin Dashboard button — visible only to admins */}
+          {isAdmin && (
+            <Link href="/admin">
+              <Button variant="ghost" size="icon" className="text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:hover:bg-orange-950" title="Admin Dashboard">
+                <LayoutDashboard className="h-5 w-5" />
+              </Button>
+            </Link>
+          )}
+
           <Link href="/products" aria-label="Search">
             <Button variant="ghost" size="icon" className="hidden sm:flex">
               <Search className="h-5 w-5" />
@@ -124,6 +137,11 @@ export function Header() {
             <Link href="/register" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
               Create Account
             </Link>
+            {isAdmin && (
+              <Link href="/admin" className="block py-3 px-4 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950 font-medium min-h-[44px] flex items-center text-orange-600" onClick={() => setMobileMenuOpen(false)}>
+                <LayoutDashboard className="h-5 w-5 mr-2" /> Admin Dashboard
+              </Link>
+            )}
             <a href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px]">
               <Instagram className="h-5 w-5" /> Follow on Instagram
             </a>
