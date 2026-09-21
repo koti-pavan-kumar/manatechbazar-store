@@ -91,7 +91,7 @@ export function Header() {
             </Button>
           </Link>
 
-          <Link href="/register" aria-label="Account">
+          <Link href={isAdmin ? "/admin" : (session ? "/account" : "/register")} aria-label="Account">
             <Button variant="ghost" size="icon">
               <User className="h-5 w-5" />
             </Button>
@@ -134,9 +134,15 @@ export function Header() {
             <Link href="/wishlist" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
               ❤️ My Wishlist
             </Link>
-            <Link href="/register" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
-              Create Account
-            </Link>
+            {session ? (
+              <Link href="/account" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                👤 My Account
+              </Link>
+            ) : (
+              <Link href="/register" className="block py-3 px-4 rounded-lg hover:bg-accent font-medium min-h-[44px] flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                Create Account
+              </Link>
+            )}
             {isAdmin && (
               <Link href="/admin" className="block py-3 px-4 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-950 font-medium min-h-[44px] flex items-center text-orange-600" onClick={() => setMobileMenuOpen(false)}>
                 <LayoutDashboard className="h-5 w-5 mr-2" /> Admin Dashboard
