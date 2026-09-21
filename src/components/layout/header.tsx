@@ -166,14 +166,14 @@ export function Header() {
             className="mx-auto max-w-7xl px-4"
           >
             <div className="relative flex items-center">
-              <Search className="absolute left-3 h-5 w-5 text-muted-foreground pointer-events-none" />
+              <Search className="absolute left-4 h-5 w-5 text-gray-500 dark:text-gray-400 pointer-events-none" />
               <input
                 ref={searchRef}
                 type="text"
-                placeholder="Search products..."
+                placeholder="🔍  Search for products, brands, categories..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-11 pl-11 pr-4 text-sm rounded-xl border bg-muted/50 focus:bg-background focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
+                className="w-full h-12 pl-12 pr-4 text-sm font-medium rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 shadow-md focus:border-primary focus:ring-2 focus:ring-primary/30 focus:shadow-lg outline-none transition-all"
               />
             </div>
           </form>
