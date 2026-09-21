@@ -10,10 +10,10 @@ import { CartToast } from "@/components/cart-toast";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col overflow-x-hidden">
+    <div className="flex min-h-dvh flex-col w-full max-w-full overflow-x-clip">
       <NavLoading />
       <Header />
-      <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">{children}</main>
+      <main className="flex-1 pb-20 lg:pb-0 w-full overflow-x-clip">{children}</main>
       <Footer />
       <BottomNav />
       <WhatsAppButtonLazy />

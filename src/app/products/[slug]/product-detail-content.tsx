@@ -159,7 +159,7 @@ export function ProductDetailContent({ product, related }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 pb-28 lg:pb-8">
+    <div className="mx-auto max-w-7xl px-4 py-4 pb-28 lg:pb-8 w-full overflow-x-clip">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4 overflow-x-auto no-scrollbar">
         <Link href="/" className="hover:text-foreground shrink-0">Home</Link>
@@ -554,9 +554,9 @@ export function ProductDetailContent({ product, related }: Props) {
 
       {/* Sticky Mobile Buy Now + Add to Cart */}
       {currentStock > 0 && (
-        <div className="fixed bottom-[68px] left-0 right-0 border-t bg-background p-3 lg:hidden z-40">
-          <div className="flex items-center gap-2">
-            <div className="flex-1 min-w-0">
+        <div className="fixed bottom-[60px] left-0 right-0 border-t bg-background/95 backdrop-blur p-2.5 lg:hidden z-40 w-full max-w-full">
+          <div className="flex items-center gap-2 w-full max-w-full px-1">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <p className="text-xs text-muted-foreground truncate">{product.title}</p>
               <p className="font-bold text-sm">{formatPrice(currentPrice)}</p>
             </div>
@@ -564,15 +564,15 @@ export function ProductDetailContent({ product, related }: Props) {
               size="sm"
               onClick={handleAddToCart}
               className={cn(
-                "px-3 h-10 rounded-xl font-semibold text-xs shrink-0 transition-all duration-300",
+                "px-2 h-9 rounded-lg font-semibold text-[11px] shrink-0 transition-all duration-300",
                 addedToCart
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : ""
               )}
             >
-              {addedToCart ? <><Check className="h-4 w-4 mr-1" /> Added!</> : <><ShoppingCart className="h-4 w-4 mr-1" /> Cart</>}
+              {addedToCart ? <><Check className="h-3.5 w-3.5" /> </> : <><ShoppingCart className="h-3.5 w-3.5" /> Cart</>}
             </Button>
-            <Button size="sm" onClick={handleBuyNow} className="px-4 h-10 rounded-xl font-semibold text-xs bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shrink-0">
+            <Button size="sm" onClick={handleBuyNow} className="px-3 h-9 rounded-lg font-semibold text-[11px] bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shrink-0">
               ⚡ Buy Now
             </Button>
           </div>

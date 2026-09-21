@@ -168,7 +168,7 @@ export default function CheckoutPage() {
   return (
     <>
       <script src="https://checkout.razorpay.com/v1/checkout.js" async />
-      <div className="mx-auto max-w-3xl px-4 py-6">
+      <div className="mx-auto max-w-3xl px-4 py-6 w-full overflow-x-clip">
         <h1 className="text-2xl font-bold mb-2">Checkout</h1>
         <p className="text-sm text-muted-foreground mb-6">Fill in your billing details to place the order</p>
 
