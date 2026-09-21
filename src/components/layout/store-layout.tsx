@@ -6,6 +6,7 @@ import { BottomNav } from "./bottom-nav";
 import { WhatsAppButtonLazy } from "./whatsapp-button-lazy";
 import { ChatWidgetLazy } from "@/components/chat-widget-lazy";
 import { NavLoading } from "@/components/nav-loading";
+import { CartToast } from "@/components/cart-toast";
 
 export function StoreLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -17,6 +18,7 @@ export function StoreLayout({ children }: { children: React.ReactNode }) {
       <BottomNav />
       <WhatsAppButtonLazy />
       <ChatWidgetLazy />
+      <CartToast />
     </div>
   );
 }

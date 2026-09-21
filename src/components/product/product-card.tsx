@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { showToast } from "@/components/cart-toast";
 
 interface ProductCardProps {
   product: {
@@ -97,10 +97,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       stock: product.stock,
       freeShipping: product.freeShipping,
     });
-    toast.success(`${product.title} added to cart!`, {
-      duration: 2500,
-      icon: <ShoppingCart className="h-4 w-4" />,
-    });
+    showToast(`${product.title} added to cart!`);
     setTimeout(() => setAddedToCart(false), 2000);
   };
 

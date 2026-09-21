@@ -16,7 +16,7 @@ import { formatPrice, calcDiscount, safeJsonParse } from "@/lib/utils";
 import { useCartStore } from "@/stores/cart";
 import { useWishlistStore } from "@/stores/wishlist";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
+import { showToast } from "@/components/cart-toast";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -75,10 +75,7 @@ export function ProductDetailContent({ product, related }: Props) {
         : undefined,
     }, quantity);
     setAddedToCart(true);
-    toast.success(`${product.title} added to cart!`, {
-      duration: 2500,
-      icon: <ShoppingCart className="h-4 w-4" />,
-    });
+    showToast(`${product.title} added to cart!`);
     setTimeout(() => setAddedToCart(false), 2000);
   }, [addItem, product, currentPrice, currentStock, selectedVariant, quantity]);
 
