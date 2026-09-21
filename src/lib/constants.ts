@@ -14,6 +14,8 @@ export const STORE = {
 
 // Order status labels
 export const ORDER_STATUS: Record<string, { label: string; color: string }> = {
+  PAYMENT_PENDING: { label: "Payment Pending", color: "bg-orange-100 text-orange-800" },
+  PAYMENT_FAILED: { label: "Payment Failed", color: "bg-red-100 text-red-800" },
   PLACED: { label: "Order Placed", color: "bg-blue-100 text-blue-800" },
   CONFIRMED: { label: "Confirmed", color: "bg-indigo-100 text-indigo-800" },
   SHIPPED: { label: "Shipped", color: "bg-yellow-100 text-yellow-800" },

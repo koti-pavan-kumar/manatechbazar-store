@@ -121,20 +121,22 @@ export async function POST(req: NextRequest) {
     const orderNumber = generateOrderNumber();
 
     if (paymentMode === "RAZORPAY") {
-      // Create Razorpay order
+      // Create Razorpay order ONLY — no internal order yet
+      // The internal order will be created AFTER payment is verified
       const razorpayOrder = await razorpay.orders.create({
         amount: total, // amount in paise
         currency: "INR",
         receipt: orderNumber,
       });
 
-      // Create internal order in PENDING state
-      const order = await db.order.create({
+      // Store checkout data in a pending order record (NOT visible to customer)
+      // This is used by the verify endpoint to create the real order after payment
+      const pendingOrder = await db.order.create({
         data: {
           userId,
           addressId,
           orderNumber,
-          status: "PLACED",
+          status: "PAYMENT_PENDING",
           paymentMode: "RAZORPAY",
           paymentStatus: "PENDING",
           razorpayOrderId: razorpayOrder.id,
@@ -149,22 +151,11 @@ export async function POST(req: NextRequest) {
         },
       });
 
-      // Decrease stock optimistically
-      for (const item of orderItems) {
-        await db.product.update({
-          where: { id: item.id },
-          data: { stock: { decrement: item.quantity } },
-        });
-      }
-
-      // Clear cart
-      await db.cartItem.deleteMany({ where: { userId } });
-
       return NextResponse.json({
         success: true,
         razorpayKeyId: process.env.RAZORPAY_KEY_ID,
         razorpayOrderId: razorpayOrder.id,
-        internalOrderId: order.id,
+        internalOrderId: pendingOrder.id,
         amount: total,
       });
     }

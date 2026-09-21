@@ -9,7 +9,11 @@ export async function GET(req: NextRequest) {
   }
 
   const orders = await db.order.findMany({
-    where: { userId: (session.user as any).id },
+    where: {
+      userId: (session.user as any).id,
+      // Only show orders that are not waiting for payment
+      status: { not: "PAYMENT_PENDING" },
+    },
     include: { items: true },
     orderBy: { createdAt: "desc" },
   });

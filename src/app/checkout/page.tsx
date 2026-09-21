@@ -192,6 +192,8 @@ export default function CheckoutPage() {
           modal: {
             ondismiss: function () {
               setLoading(false);
+              // Order was NOT created — user exited without paying
+              // Cart is still intact, user can try again
             },
             confirm_close: true,
           },
