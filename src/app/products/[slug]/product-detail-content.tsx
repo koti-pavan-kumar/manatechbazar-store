@@ -159,7 +159,7 @@ export function ProductDetailContent({ product, related }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-4 pb-28 lg:pb-8 w-full overflow-x-clip">
+    <div className="mx-auto max-w-7xl px-3 sm:px-4 py-4 pb-28 lg:pb-8 w-full overflow-hidden">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4 overflow-x-auto no-scrollbar">
         <Link href="/" className="hover:text-foreground shrink-0">Home</Link>
@@ -351,43 +351,48 @@ export function ProductDetailContent({ product, related }: Props) {
           </div>
 
           {/* Action Buttons */}
-          <div className="space-y-3">
+          <div className="space-y-3 w-full overflow-hidden">
             {currentStock > 0 ? (
-              <div className="flex gap-3">
-                <Button size="lg" className="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white" onClick={handleBuyNow}>
-                  ⚡ Buy Now
-                </Button>
-                <Button
-                  size="lg"
-                  onClick={handleAddToCart}
-                  className={cn(
-                    "transition-all duration-300",
-                    addedToCart
-                      ? "bg-green-500 text-white hover:bg-green-600 border-green-500"
-                      : ""
-                  )}
-                >
-                  {addedToCart ? (
-                    <><Check className="h-5 w-5 mr-2" /> Added!</>
-                  ) : (
-                    <><ShoppingCart className="h-5 w-5 mr-2" /> Add to Cart</>
-                  )}
-                </Button>
-                <Button size="lg" variant="outline" onClick={handleWishlist}>
-                  <Heart className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
-                </Button>
-              </div>
+              <>
+                {/* Main row: Buy Now + Add to Cart side by side */}
+                <div className="flex gap-2 w-full">
+                  <Button size="lg" className="flex-1 min-w-0 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm sm:text-base" onClick={handleBuyNow}>
+                    ⚡ Buy Now
+                  </Button>
+                  <Button
+                    size="lg"
+                    onClick={handleAddToCart}
+                    className={cn(
+                      "flex-1 min-w-0 transition-all duration-300 text-sm sm:text-base",
+                      addedToCart
+                        ? "bg-green-500 text-white hover:bg-green-600 border-green-500"
+                        : ""
+                    )}
+                  >
+                    {addedToCart ? (
+                      <><Check className="h-4 w-4 mr-1 sm:mr-2" /> Added!</>
+                    ) : (
+                      <><ShoppingCart className="h-4 w-4 mr-1 sm:mr-2" /> Add to Cart</>
+                    )}
+                  </Button>
+                </div>
+                {/* Wishlist + WhatsApp row */}
+                <div className="flex gap-2 w-full">
+                  <Button size="lg" variant="outline" onClick={handleWishlist} className="h-12 w-12 shrink-0 p-0">
+                    <Heart className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
+                  </Button>
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-w-0">
+                    <Button size="lg" variant="outline" className="w-full h-12 border-green-500 text-green-600 hover:bg-green-50 text-sm sm:text-base">
+                      <MessageCircle className="h-4 w-4 mr-1 sm:mr-2 shrink-0" /> Order on WhatsApp
+                    </Button>
+                  </a>
+                </div>
+              </>
             ) : (
               <Button size="lg" className="w-full" disabled>
                 Out of Stock
               </Button>
             )}
-
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
-              <Button size="lg" variant="outline" className="w-full border-green-500 text-green-600 hover:bg-green-50">
-                <MessageCircle className="h-5 w-5" /> Order on WhatsApp
-              </Button>
-            </a>
           </div>
 
           {/* Admin Controls */}
@@ -428,9 +433,9 @@ export function ProductDetailContent({ product, related }: Props) {
           )}
 
           {/* Description */}
-          <div>
+          <div className="w-full overflow-hidden">
             <h3 className="font-medium mb-2">Description</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+            <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line break-words">
               {product.description}
             </p>
           </div>
@@ -447,19 +452,19 @@ export function ProductDetailContent({ product, related }: Props) {
           )}
 
           {/* Trust Signals */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-              <Truck className="h-5 w-5 text-green-600" />
-              <div>
-                <p className="text-xs font-medium">{product.freeShipping ? "Free Delivery" : "Delivery"}</p>
-                <p className="text-[10px] text-muted-foreground">{product.freeShipping ? "Included" : "Above ₹499"}</p>
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 w-full">
+            <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+              <Truck className="h-5 w-5 text-green-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs font-medium truncate">{product.freeShipping ? "Free Delivery" : "Delivery"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">{product.freeShipping ? "Included" : "Above ₹499"}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50">
-              <Shield className="h-5 w-5 text-blue-600" />
-              <div>
-                <p className="text-xs font-medium">Secure Payment</p>
-                <p className="text-[10px] text-muted-foreground">UPI & COD</p>
+            <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-lg bg-muted/50 min-w-0 overflow-hidden">
+              <Shield className="h-5 w-5 text-blue-600 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs font-medium truncate">Secure Payment</p>
+                <p className="text-[10px] text-muted-foreground truncate">UPI & Cards</p>
               </div>
             </div>
           </div>
