@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
-import { sendOrderConfirmation } from "@/lib/email";
 import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -22,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Fetch the pending order
     const order = await db.order.findUnique({
       where: { id: orderId },
-      include: { items: true, address: true, user: true },
+      include: { items: true },
     });
 
     if (!order) {
@@ -34,8 +33,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: true, orderId: order.id });
     }
 
-    // Payment verified! Now activate the order:
-    // 1. Update order status to CONFIRMED
+    // Payment verified! Activate the order:
+    // 1. Update order status
     await db.order.update({
       where: { id: orderId },
       data: {
@@ -51,25 +50,6 @@ export async function POST(req: NextRequest) {
       await db.product.update({
         where: { id: item.productId },
         data: { stock: { decrement: item.quantity } },
-      });
-    }
-
-    // 3. Clear the user's cart
-    await db.cartItem.deleteMany({ where: { userId: order.userId } });
-
-    // 4. Send order confirmation email
-    if (order.user?.email) {
-      sendOrderConfirmation({
-        orderNumber: order.orderNumber,
-        customerName: order.user.name || "",
-        customerEmail: order.user.email,
-        items: order.items.map((i) => ({ title: i.title, quantity: i.quantity, total: i.total })),
-        subtotal: order.subtotal,
-        discount: order.discount,
-        shipping: order.shippingCharges,
-        total: order.total,
-        paymentMode: "RAZORPAY",
-        address: order.address ? `${order.address.line1}, ${order.address.city}, ${order.address.state} - ${order.address.pincode}` : "",
       });
     }
 

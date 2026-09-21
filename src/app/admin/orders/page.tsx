@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
                       </Badge>
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {order.user?.name} • {order.user?.email} • {new Date(order.createdAt).toLocaleDateString("en-IN")}
+                      {order.guestName || order.user?.name || "Guest"} • {order.guestPhone || order.user?.phone || ""} • {new Date(order.createdAt).toLocaleDateString("en-IN")}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {order.items?.length} item(s) • {formatPrice(order.total)}

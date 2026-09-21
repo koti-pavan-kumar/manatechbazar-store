@@ -14,7 +14,23 @@ export async function GET() {
 
   const orders = await db.order.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
+    select: {
+      id: true,
+      orderNumber: true,
+      status: true,
+      paymentMode: true,
+      paymentStatus: true,
+      subtotal: true,
+      discount: true,
+      shippingCharges: true,
+      total: true,
+      couponCode: true,
+      createdAt: true,
+      shippedAt: true,
+      deliveredAt: true,
+      guestName: true,
+      guestPhone: true,
+      guestEmail: true,
       user: { select: { name: true, email: true, phone: true } },
       items: true,
       address: true,

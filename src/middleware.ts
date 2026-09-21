@@ -6,7 +6,6 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Use next-auth's getToken which can decrypt JWE tokens
-  // On HTTPS (Vercel), cookies are prefixed with __Secure-
   const token = await getToken({
     req: request,
     secret: process.env.AUTH_SECRET,
@@ -26,27 +25,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Checkout requires auth — send to register (new users) or login (existing)
-  if (pathname === "/checkout") {
-    if (!token) {
-      const registerUrl = new URL("/register", request.url);
-      registerUrl.searchParams.set("callbackUrl", "/checkout");
-      return NextResponse.redirect(registerUrl);
-    }
-  }
-
-  // Account and orders require auth — send to register
-  if (pathname === "/account" || pathname.startsWith("/orders")) {
-    if (!token) {
-      const registerUrl = new URL("/register", request.url);
-      registerUrl.searchParams.set("callbackUrl", pathname);
-      return NextResponse.redirect(registerUrl);
-    }
-  }
-
+  // Everything else is open — no customer auth required
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/checkout", "/account", "/orders/:path*", "/api/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };

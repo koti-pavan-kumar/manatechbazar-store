@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
-import { sendOrderConfirmation } from "@/lib/email";
-import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 import Razorpay from "razorpay";
+import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || "",
@@ -12,14 +10,9 @@ const razorpay = new Razorpay({
 });
 
 export async function POST(req: NextRequest) {
-  const session = await auth();
-  if (!session?.user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  // Rate limit: 5 checkouts per user per 15 minutes
-  const userId = (session.user as any).id;
-  const rl = rateLimit(userId, {
+  // Rate limit: 5 checkouts per IP per 15 minutes
+  const ip = getClientIp(req);
+  const rl = rateLimit(ip, {
     key: "checkout",
     maxRequests: 5,
     windowMs: 15 * 60 * 1000,
@@ -29,41 +22,47 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { addressId, paymentMode, couponCode, items: cartItems } = await req.json();
-    const userId = (session.user as any).id;
+    const {
+      // Billing info (guest)
+      guestName,
+      guestPhone,
+      guestEmail,
+      // Address fields
+      address: addressFields,
+      // Cart items from client
+      items: cartItems,
+      couponCode,
+    } = await req.json();
 
-    // Fetch cart items from database if not provided
-    let orderItems = cartItems;
-    if (!orderItems || orderItems.length === 0) {
-      const dbCartItems = await db.cartItem.findMany({
-        where: { userId },
-        include: { product: true },
-      });
-      orderItems = dbCartItems.map((ci) => ({
-        id: ci.product.id,
-        title: ci.product.title,
-        slug: ci.product.slug,
-        price: ci.product.price,
-        mrp: ci.product.mrp,
-        image: typeof ci.product.images === "string" ? JSON.parse(ci.product.images)[0] : ci.product.images[0],
-        quantity: ci.quantity,
-        stock: ci.product.stock,
-      }));
+    // Validate required fields
+    if (!guestName || !guestPhone) {
+      return NextResponse.json({ error: "Name and phone number are required" }, { status: 400 });
     }
-
-    if (!orderItems || orderItems.length === 0) {
+    if (!addressFields?.line1 || !addressFields?.city || !addressFields?.state || !addressFields?.pincode) {
+      return NextResponse.json({ error: "Complete address is required" }, { status: 400 });
+    }
+    if (!cartItems || cartItems.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // Validate address
-    const address = await db.address.findUnique({ where: { id: addressId } });
-    if (!address || address.userId !== userId) {
-      return NextResponse.json({ error: "Invalid address" }, { status: 400 });
-    }
+    // Create a standalone address (no userId needed)
+    const address = await db.address.create({
+      data: {
+        name: guestName,
+        phone: guestPhone,
+        line1: addressFields.line1,
+        line2: addressFields.line2 || null,
+        city: addressFields.city,
+        state: addressFields.state,
+        pincode: addressFields.pincode,
+        country: "IN",
+        isDefault: false,
+      },
+    });
 
     // Calculate totals server-side (never trust client)
     let subtotal = 0;
-    const processedItems = orderItems.map((item: any) => {
+    const processedItems = cartItems.map((item: any) => {
       const itemTotal = item.price * item.quantity;
       const itemDiscount = (item.mrp - item.price) * item.quantity;
       subtotal += itemTotal;
@@ -93,7 +92,6 @@ export async function POST(req: NextRequest) {
               coupon.maxDiscount || Infinity
             );
           }
-          // Increment usage count
           await db.coupon.update({
             where: { id: coupon.id },
             data: { usedCount: { increment: 1 } },
@@ -103,12 +101,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if any item has free shipping
-    const hasFreeShipping = orderItems.some((item: any) => item.freeShipping);
-    const shipping = hasFreeShipping || subtotal >= 49900 ? 0 : 4900; // Free if product has freeShipping or subtotal >= ₹499
-    const total = Math.max(1, subtotal - couponDiscount + shipping); // Min ₹1
+    const hasFreeShipping = cartItems.some((item: any) => item.freeShipping);
+    const shipping = hasFreeShipping || subtotal >= 49900 ? 0 : 4900;
+    const total = Math.max(1, subtotal - couponDiscount + shipping);
 
     // Check stock
-    for (const item of orderItems) {
+    for (const item of cartItems) {
       const product = await db.product.findUnique({ where: { id: item.id } });
       if (!product || product.stock < item.quantity) {
         return NextResponse.json(
@@ -120,95 +118,43 @@ export async function POST(req: NextRequest) {
 
     const orderNumber = generateOrderNumber();
 
-    if (paymentMode === "RAZORPAY") {
-      // Create Razorpay order ONLY — no internal order yet
-      // The internal order will be created AFTER payment is verified
-      const razorpayOrder = await razorpay.orders.create({
-        amount: total, // amount in paise
-        currency: "INR",
-        receipt: orderNumber,
-      });
+    // Create Razorpay order ONLY — no internal order yet
+    const razorpayOrder = await razorpay.orders.create({
+      amount: total,
+      currency: "INR",
+      receipt: orderNumber,
+    });
 
-      // Store checkout data in a pending order record (NOT visible to customer)
-      // This is used by the verify endpoint to create the real order after payment
-      const pendingOrder = await db.order.create({
-        data: {
-          userId,
-          addressId,
-          orderNumber,
-          status: "PAYMENT_PENDING",
-          paymentMode: "RAZORPAY",
-          paymentStatus: "PENDING",
-          razorpayOrderId: razorpayOrder.id,
-          subtotal,
-          discount: couponDiscount,
-          shippingCharges: shipping,
-          total,
-          couponCode: couponCode || null,
-          items: {
-            create: processedItems,
-          },
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        razorpayKeyId: process.env.RAZORPAY_KEY_ID,
-        razorpayOrderId: razorpayOrder.id,
-        internalOrderId: pendingOrder.id,
-        amount: total,
-      });
-    }
-
-    // COD — create order directly
-    const order = await db.order.create({
+    // Store pending order (PAYMENT_PENDING — hidden from customer)
+    const pendingOrder = await db.order.create({
       data: {
-        userId,
-        addressId,
         orderNumber,
-        status: "PLACED",
-        paymentMode: "COD",
+        status: "PAYMENT_PENDING",
+        paymentMode: "RAZORPAY",
         paymentStatus: "PENDING",
+        razorpayOrderId: razorpayOrder.id,
+        addressId: address.id,
         subtotal,
         discount: couponDiscount,
         shippingCharges: shipping,
         total,
         couponCode: couponCode || null,
+        // Guest info
+        guestName,
+        guestPhone,
+        guestEmail: guestEmail || null,
         items: {
           create: processedItems,
         },
       },
     });
 
-    // Decrease stock
-    for (const item of orderItems) {
-      await db.product.update({
-        where: { id: item.id },
-        data: { stock: { decrement: item.quantity } },
-      });
-    }
-
-    // Clear cart
-    await db.cartItem.deleteMany({ where: { userId } });
-
-    // Send order confirmation email
-    const user = await db.user.findUnique({ where: { id: userId } });
-    sendOrderConfirmation({
-      orderNumber,
-      customerName: user?.name || "",
-      customerEmail: user?.email || "",
-      items: processedItems.map((i: any) => ({ title: i.title, quantity: i.quantity, total: i.total })),
-      subtotal,
-      discount: couponDiscount,
-      shipping,
-      total,
-      paymentMode: "COD",
-      address: `${address.line1}, ${address.city}, ${address.state} - ${address.pincode}`,
-    });
-
     return NextResponse.json({
       success: true,
-      orderId: order.id,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID,
+      razorpayOrderId: razorpayOrder.id,
+      internalOrderId: pendingOrder.id,
+      amount: total,
     });
   } catch (error: any) {
     console.error("Checkout error:", error);

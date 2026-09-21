@@ -11,79 +11,108 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const limit = parseInt(searchParams.get("limit") || "50");
     const search = searchParams.get("search") || "";
-    const sortBy = searchParams.get("sortBy") || "createdAt";
-    const sortOrder = searchParams.get("sortOrder") || "desc";
 
     const skip = (page - 1) * limit;
 
-    // Build search filter
-    const where: any = { role: "CUSTOMER" };
+    // Fetch all orders (both registered and guest)
+    const where: any = {};
     if (search) {
       where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-        { phone: { contains: search, mode: "insensitive" } },
+        { guestName: { contains: search, mode: "insensitive" } },
+        { guestPhone: { contains: search } },
+        { guestEmail: { contains: search, mode: "insensitive" } },
+        { user: { name: { contains: search, mode: "insensitive" } } },
+        { user: { phone: { contains: search } } },
+        { user: { email: { contains: search, mode: "insensitive" } } },
+        { orderNumber: { contains: search, mode: "insensitive" } },
       ];
     }
 
-    // Get total count
-    const total = await db.user.count({ where });
+    const total = await db.order.count({ where });
 
-    // Get customers with order stats
-    const customers = await db.user.findMany({
+    const orders = await db.order.findMany({
       where,
       select: {
         id: true,
-        name: true,
-        email: true,
-        phone: true,
-        image: true,
+        orderNumber: true,
+        guestName: true,
+        guestPhone: true,
+        guestEmail: true,
+        total: true,
+        status: true,
+        paymentStatus: true,
         createdAt: true,
-        orders: {
+        address: {
           select: {
-            id: true,
-            total: true,
-            status: true,
-            createdAt: true,
+            name: true,
+            phone: true,
+            line1: true,
+            city: true,
+            state: true,
+            pincode: true,
           },
-          orderBy: { createdAt: "desc" },
+        },
+        user: {
+          select: {
+            name: true,
+            phone: true,
+            email: true,
+          },
         },
       },
-      orderBy: { [sortBy]: sortOrder },
+      orderBy: { createdAt: "desc" },
       skip,
       take: limit,
     });
 
-    // Compute stats for each customer
-    const customersWithStats = customers.map((c) => {
-      const totalSpent = c.orders.reduce((sum, o) => sum + o.total, 0);
-      const totalOrders = c.orders.length;
-      const lastOrder = c.orders[0]?.createdAt || null;
-      const deliveredOrders = c.orders.filter((o) => o.status === "DELIVERED").length;
+    // Build customer list from orders
+    const customerMap = new Map<string, any>();
 
-      return {
-        id: c.id,
-        name: c.name,
-        email: c.email,
-        phone: c.phone,
-        image: c.image,
-        joinedAt: c.createdAt,
-        totalOrders,
-        totalSpent,
-        deliveredOrders,
-        lastOrderDate: lastOrder,
-      };
-    });
+    for (const order of orders) {
+      const name = order.guestName || order.user?.name || order.address?.name || "Unknown";
+      const phone = order.guestPhone || order.user?.phone || order.address?.phone || "N/A";
+      const email = order.guestEmail || order.user?.email || "N/A";
+      const key = phone !== "N/A" ? phone : name;
+
+      if (!customerMap.has(key)) {
+        customerMap.set(key, {
+          name,
+          phone,
+          email,
+          totalOrders: 0,
+          totalSpent: 0,
+          lastOrderDate: order.createdAt,
+          orders: [],
+        });
+      }
+
+      const customer = customerMap.get(key);
+      customer.totalOrders++;
+      customer.totalSpent += order.total;
+      if (new Date(order.createdAt) > new Date(customer.lastOrderDate)) {
+        customer.lastOrderDate = order.createdAt;
+      }
+      customer.orders.push({
+        orderNumber: order.orderNumber,
+        status: order.status,
+        total: order.total,
+        createdAt: order.createdAt,
+      });
+    }
+
+    const customers = Array.from(customerMap.values())
+      .sort((a, b) => new Date(b.lastOrderDate).getTime() - new Date(a.lastOrderDate).getTime())
+      .slice(skip, skip + limit);
 
     return NextResponse.json({
-      customers: customersWithStats,
+      customers,
       pagination: {
         page,
         limit,
-        total,
-        totalPages: Math.ceil(total / limit),
+        total: customerMap.size,
+        totalPages: Math.ceil(customerMap.size / limit),
       },
     });
   } catch (error: any) {

@@ -1,23 +1,17 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { checkoutSchema, addressSchema } from "@/lib/validations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
 import { STORE } from "@/lib/constants";
-import { CreditCard, Banknote, Loader2, Check, Plus } from "lucide-react";
+import { CreditCard, Loader2, Check, MapPin, User, Phone } from "lucide-react";
 
 declare global {
   interface Window {
@@ -25,46 +19,41 @@ declare global {
   }
 }
 
+const billingSchema = {
+  parse: (data: any) => {
+    if (!data.name?.trim()) throw new Error("Name is required");
+    if (!data.phone?.trim() || data.phone.replace(/\D/g, "").length < 10) throw new Error("Valid phone number is required");
+    if (!data.line1?.trim()) throw new Error("Address is required");
+    if (!data.city?.trim()) throw new Error("City is required");
+    if (!data.state?.trim()) throw new Error("State is required");
+    if (!data.pincode?.trim() || data.pincode.length < 6) throw new Error("Valid pincode is required");
+    return data;
+  },
+};
+
 export default function CheckoutPage() {
-  const { data: session } = useSession();
   const router = useRouter();
   const { items, getSubtotal, couponCode, discount, clearCart } = useCartStore();
-  const [addresses, setAddresses] = useState<any[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<string>("");
-  const [paymentMode, setPaymentMode] = useState<"RAZORPAY" | "COD">("RAZORPAY");
   const [loading, setLoading] = useState(false);
-  const [showNewAddress, setShowNewAddress] = useState(false);
+  const [step, setStep] = useState<"billing" | "payment">("billing");
 
-  const subtotal = getSubtotal();
-  const hasFreeShippingItem = items.some((item) => item.freeShipping);
-  const shipping = hasFreeShippingItem || subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
-  const total = Math.max(0, subtotal - discount + shipping);
-
-  const newAddressForm = useForm({
-    resolver: zodResolver(addressSchema),
+  const { register, handleSubmit, formState: { errors }, watch } = useForm({
     defaultValues: {
-      name: (session?.user as any)?.name || "",
+      name: "",
       phone: "",
+      email: "",
       line1: "",
       line2: "",
       city: "",
       state: "",
       pincode: "",
-      country: "IN",
-      isDefault: false,
     },
   });
 
-  useEffect(() => {
-    fetch("/api/account/addresses")
-      .then((r) => r.json())
-      .then((data) => {
-        setAddresses(data.addresses || []);
-        if (data.addresses?.length > 0) {
-          setSelectedAddressId(data.addresses[0].id);
-        }
-      });
-  }, []);
+  const subtotal = getSubtotal();
+  const hasFreeShippingItem = items.some((item) => item.freeShipping);
+  const shipping = hasFreeShippingItem || subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
+  const total = Math.max(0, subtotal - discount + shipping);
 
   if (items.length === 0) {
     return (
@@ -75,134 +64,100 @@ export default function CheckoutPage() {
     );
   }
 
-  const handlePlaceOrder = async () => {
+  const onBillingSubmit = (data: any) => {
+    try {
+      billingSchema.parse(data);
+      setStep("payment");
+    } catch (e: any) {
+      alert(e.message);
+    }
+  };
+
+  const handlePayNow = async () => {
     setLoading(true);
     try {
-      let addressId = selectedAddressId;
+      const billingData = watch();
 
-      // Save new address if needed
-      if (showNewAddress && !selectedAddressId) {
-        const addrData = newAddressForm.getValues();
-        const addrRes = await fetch("/api/account/addresses", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(addrData),
-        });
-        const addrResult = await addrRes.json();
-        if (!addrRes.ok) throw new Error(addrResult.error);
-        addressId = addrResult.address.id;
-      }
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          guestName: billingData.name,
+          guestPhone: billingData.phone,
+          guestEmail: billingData.email || null,
+          address: {
+            line1: billingData.line1,
+            line2: billingData.line2 || null,
+            city: billingData.city,
+            state: billingData.state,
+            pincode: billingData.pincode,
+          },
+          couponCode,
+          items: items.map((item) => ({
+            id: item.id,
+            title: item.title,
+            slug: item.slug,
+            price: item.price,
+            mrp: item.mrp,
+            image: item.image,
+            quantity: item.quantity,
+            stock: item.stock,
+            freeShipping: item.freeShipping,
+          })),
+        }),
+      });
 
-      if (!addressId) {
-        alert("Please select or add a delivery address");
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || "Failed to create order");
         setLoading(false);
         return;
       }
 
-      if (paymentMode === "COD") {
-        // Place COD order directly
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            addressId,
-            paymentMode: "COD",
-            couponCode,
-            items: items.map((item) => ({
-              id: item.id,
-              title: item.title,
-              slug: item.slug,
-              price: item.price,
-              mrp: item.mrp,
-              image: item.image,
-              quantity: item.quantity,
-              stock: item.stock,
-              freeShipping: item.freeShipping,
-            })),
-          }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          clearCart();
-          router.push(`/orders/${data.orderId}`);
-        } else {
-          alert(data.error || "Failed to place order");
-        }
-      } else {
-        // Razorpay flow
-        const res = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            addressId,
-            paymentMode: "RAZORPAY",
-            couponCode,
-            items: items.map((item) => ({
-              id: item.id,
-              title: item.title,
-              slug: item.slug,
-              price: item.price,
-              mrp: item.mrp,
-              image: item.image,
-              quantity: item.quantity,
-              stock: item.stock,
-              freeShipping: item.freeShipping,
-            })),
-          }),
-        });
-        const data = await res.json();
-        if (!data.success) {
-          alert(data.error || "Failed to create order");
-          setLoading(false);
-          return;
-        }
+      // Open Razorpay checkout
+      const options = {
+        key: data.razorpayKeyId,
+        amount: data.amount,
+        currency: "INR",
+        name: STORE.name,
+        order_id: data.razorpayOrderId,
+        handler: async function (response: any) {
+          // Verify payment
+          const verifyRes = await fetch("/api/razorpay/verify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              orderId: data.internalOrderId,
+            }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyData.success) {
+            clearCart();
+            router.push(`/orders/${data.internalOrderId}`);
+          } else {
+            alert("Payment verification failed. Please contact support.");
+          }
+        },
+        prefill: {
+          name: billingData.name,
+          contact: billingData.phone,
+          email: billingData.email || "",
+        },
+        theme: { color: "#1a1a1a" },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          },
+          confirm_close: true,
+        },
+        notes: { checkout_domain: "manatechbazar.in" },
+      };
 
-        // Open Razorpay checkout
-        const options = {
-          key: data.razorpayKeyId,
-          amount: data.amount,
-          currency: "INR",
-          name: STORE.name,
-          order_id: data.razorpayOrderId,
-          handler: async function (response: any) {
-            // Verify payment
-            const verifyRes = await fetch("/api/razorpay/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                orderId: data.internalOrderId,
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (verifyData.success) {
-              clearCart();
-              router.push(`/orders/${data.internalOrderId}`);
-            } else {
-              alert("Payment verification failed. Please contact support.");
-            }
-          },
-          prefill: {
-            name: (session?.user as any)?.name || "",
-            email: session?.user?.email || "",
-          },
-          theme: { color: "#1a1a1a" },
-          modal: {
-            ondismiss: function () {
-              setLoading(false);
-              // Order was NOT created — user exited without paying
-              // Cart is still intact, user can try again
-            },
-            confirm_close: true,
-          },
-          notes: { checkout_domain: "manatechbazar.in" },
-        };
-
-        const rzp = new window.Razorpay(options);
-        rzp.open();
-      }
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (error: any) {
       alert(error.message || "Something went wrong");
     } finally {
@@ -214,104 +169,140 @@ export default function CheckoutPage() {
     <>
       <script src="https://checkout.razorpay.com/v1/checkout.js" async />
       <div className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">Checkout</h1>
+        <h1 className="text-2xl font-bold mb-2">Checkout</h1>
+        <p className="text-sm text-muted-foreground mb-6">Fill in your billing details to place the order</p>
 
         <div className="space-y-6">
-          {/* Address Selection */}
-          <Card>
+          {/* ═══════════ BILLING FORM ═══════════ */}
+          <Card className={step === "payment" ? "opacity-60" : ""}>
             <CardHeader>
-              <CardTitle className="text-lg">Delivery Address</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {addresses.length > 0 && (
-                <RadioGroup value={selectedAddressId} onValueChange={setSelectedAddressId}>
-                  {addresses.map((addr: any) => (
-                    <label key={addr.id} className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value={addr.id} />
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium">{addr.name}</span>
-                          {addr.isDefault && <Badge variant="secondary" className="text-xs">Default</Badge>}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{addr.line1}{addr.line2 ? `, ${addr.line2}` : ""}</p>
-                        <p className="text-sm text-muted-foreground">{addr.city}, {addr.state} - {addr.pincode}</p>
-                        <p className="text-sm text-muted-foreground">📞 {addr.phone}</p>
-                      </div>
-                    </label>
-                  ))}
-                </RadioGroup>
-              )}
-
-              <Button variant="outline" onClick={() => setShowNewAddress(!showNewAddress)} className="w-full">
-                <Plus className="h-4 w-4 mr-2" /> Add New Address
-              </Button>
-
-              {showNewAddress && (
-                <form className="grid grid-cols-2 gap-3 mt-4 p-4 border rounded-xl bg-muted/30">
-                  <div className="col-span-2 sm:col-span-1">
-                    <Label>Name</Label>
-                    <Input {...newAddressForm.register("name")} />
-                  </div>
-                  <div className="col-span-2 sm:col-span-1">
-                    <Label>Phone</Label>
-                    <Input {...newAddressForm.register("phone")} />
-                  </div>
-                  <div className="col-span-2">
-                    <Label>Address Line 1</Label>
-                    <Input {...newAddressForm.register("line1")} />
-                  </div>
-                  <div className="col-span-2">
-                    <Label>Address Line 2 (optional)</Label>
-                    <Input {...newAddressForm.register("line2")} />
-                  </div>
-                  <div>
-                    <Label>City</Label>
-                    <Input {...newAddressForm.register("city")} />
-                  </div>
-                  <div>
-                    <Label>State</Label>
-                    <Input {...newAddressForm.register("state")} />
-                  </div>
-                  <div>
-                    <Label>Pincode</Label>
-                    <Input {...newAddressForm.register("pincode")} />
-                  </div>
-                </form>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Payment Method */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Payment Method</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="h-5 w-5 text-blue-500" />
+                Billing Information
+                {step === "payment" && <span className="text-xs text-green-600 ml-auto">✓ Filled</span>}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <RadioGroup value={paymentMode} onValueChange={(v) => setPaymentMode(v as any)}>
-                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                  <RadioGroupItem value="RAZORPAY" />
-                  <CreditCard className="h-5 w-5 text-blue-600" />
+              <form onSubmit={handleSubmit(onBillingSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <p className="font-medium">Online Payment (UPI / Cards / Wallets)</p>
-                    <p className="text-xs text-muted-foreground">Pay securely via Razorpay</p>
+                    <Label htmlFor="name">Full Name *</Label>
+                    <Input
+                      id="name"
+                      placeholder="Your full name"
+                      className="h-12 rounded-xl"
+                      disabled={step === "payment"}
+                      {...register("name", { required: "Name is required" })}
+                    />
+                    {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message as string}</p>}
                   </div>
-                </label>
-                <label className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors">
-                  <RadioGroupItem value="COD" />
-                  <Banknote className="h-5 w-5 text-green-600" />
                   <div>
-                    <p className="font-medium">Cash on Delivery</p>
-                    <p className="text-xs text-muted-foreground">Pay when you receive your order</p>
+                    <Label htmlFor="phone">Phone Number *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="10-digit phone number"
+                      className="h-12 rounded-xl"
+                      disabled={step === "payment"}
+                      {...register("phone", { required: "Phone is required", minLength: { value: 10, message: "Enter 10-digit number" } })}
+                    />
+                    {errors.phone && <p className="text-xs text-red-500 mt-1">{errors.phone.message as string}</p>}
                   </div>
-                </label>
-              </RadioGroup>
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email (optional — for order updates)</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    className="h-12 rounded-xl"
+                    disabled={step === "payment"}
+                    {...register("email")}
+                  />
+                </div>
+
+                <div className="border-t pt-4 mt-4">
+                  <p className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" /> Delivery Address
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="line1">Address Line 1 *</Label>
+                  <Input
+                    id="line1"
+                    placeholder="House/Flat no., Street, Area"
+                    className="h-12 rounded-xl"
+                    disabled={step === "payment"}
+                    {...register("line1", { required: "Address is required" })}
+                  />
+                  {errors.line1 && <p className="text-xs text-red-500 mt-1">{errors.line1.message as string}</p>}
+                </div>
+
+                <div>
+                  <Label htmlFor="line2">Address Line 2 (optional)</Label>
+                  <Input
+                    id="line2"
+                    placeholder="Landmark, Colony"
+                    className="h-12 rounded-xl"
+                    disabled={step === "payment"}
+                    {...register("line2")}
+                  />
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      placeholder="City"
+                      className="h-12 rounded-xl"
+                      disabled={step === "payment"}
+                      {...register("city", { required: "City is required" })}
+                    />
+                    {errors.city && <p className="text-xs text-red-500 mt-1">{errors.city.message as string}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="state">State *</Label>
+                    <Input
+                      id="state"
+                      placeholder="State"
+                      className="h-12 rounded-xl"
+                      disabled={step === "payment"}
+                      {...register("state", { required: "State is required" })}
+                    />
+                    {errors.state && <p className="text-xs text-red-500 mt-1">{errors.state.message as string}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="pincode">Pincode *</Label>
+                    <Input
+                      id="pincode"
+                      placeholder="6-digit"
+                      className="h-12 rounded-xl"
+                      disabled={step === "payment"}
+                      {...register("pincode", { required: "Pincode is required", minLength: { value: 6, message: "6 digits" } })}
+                    />
+                    {errors.pincode && <p className="text-xs text-red-500 mt-1">{errors.pincode.message as string}</p>}
+                  </div>
+                </div>
+
+                {step === "billing" && (
+                  <Button type="submit" size="lg" className="w-full h-12 rounded-xl font-semibold">
+                    Continue to Payment <Check className="h-4 w-4 ml-2" />
+                  </Button>
+                )}
+              </form>
             </CardContent>
           </Card>
 
-          {/* Order Summary */}
+          {/* ═══════════ ORDER SUMMARY + PAYMENT ═══════════ */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Order Summary ({items.length} items)</CardTitle>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-green-500" />
+                Order Summary ({items.length} {items.length === 1 ? "item" : "items"})
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               {items.map((item) => (
@@ -342,18 +333,35 @@ export default function CheckoutPage() {
                   <span>{formatPrice(total)}</span>
                 </div>
               </div>
+
+              {step === "payment" && (
+                <div className="pt-4 space-y-3">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3 text-sm text-blue-700 dark:text-blue-300">
+                    💳 Payment via Razorpay — UPI, Cards, Net Banking, Wallets
+                  </div>
+                  <Button
+                    size="xl"
+                    className="w-full h-14 rounded-xl text-lg font-bold"
+                    onClick={handlePayNow}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    ) : (
+                      <CreditCard className="h-5 w-5 mr-2" />
+                    )}
+                    Pay {formatPrice(total)}
+                  </Button>
+                  <button
+                    onClick={() => setStep("billing")}
+                    className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors py-2"
+                  >
+                    ← Edit billing details
+                  </button>
+                </div>
+              )}
             </CardContent>
           </Card>
-
-          <Button
-            size="xl"
-            className="w-full"
-            onClick={handlePlaceOrder}
-            disabled={loading || (!selectedAddressId && !showNewAddress)}
-          >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : <Check className="h-5 w-5 mr-2" />}
-            {paymentMode === "COD" ? "Place Order (COD)" : `Pay ${formatPrice(total)}`}
-          </Button>
         </div>
       </div>
     </>
