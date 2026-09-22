@@ -46,11 +46,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Rate limit: 20 uploads per user per hour
+  // Rate limit: admins upload many product images at once (one request per file),
+  // so they get a generous budget. Regular users stay capped.
   const userId = (session.user as any).id;
+  const role = (session.user as any).role;
   const rl = rateLimit(userId, {
     key: "upload",
-    maxRequests: 20,
+    maxRequests: role === "ADMIN" ? 500 : 20,
     windowMs: 60 * 60 * 1000,
   });
   if (!rl.allowed) {

@@ -113,9 +113,13 @@ export function getClientIp(req: Request): string {
  */
 export function rateLimitResponse(result: RateLimitResult): Response {
   const retryAfter = Math.ceil(result.resetMs / 1000);
+  const waitText =
+    retryAfter >= 60
+      ? `${Math.ceil(retryAfter / 60)} minute${Math.ceil(retryAfter / 60) > 1 ? "s" : ""}`
+      : `${retryAfter} seconds`;
   return Response.json(
     {
-      error: `Too many requests. Please try again in ${retryAfter} seconds.`,
+      error: `Too many requests. Please try again in ${waitText}.`,
       retryAfter,
     },
     {
