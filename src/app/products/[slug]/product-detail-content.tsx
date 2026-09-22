@@ -477,7 +477,7 @@ export function ProductDetailContent({ product, related }: Props) {
                 {product.reviews.slice(0, 5).map((review: any) => (
                   <div key={review.id} className="p-3 rounded-lg border">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{review.user.name}</span>
+                      <span className="text-sm font-medium">{review.user?.name || "Store Customer"}</span>
                       {review.isVerified && (
                         <Badge variant="success" className="text-[10px] py-0">Verified Purchase</Badge>
                       )}

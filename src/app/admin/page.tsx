@@ -19,7 +19,15 @@ export default async function AdminDashboard() {
       db.order.findMany({
         orderBy: { createdAt: "desc" },
         take: 5,
-        include: { user: { select: { name: true, email: true } } },
+        select: {
+          id: true,
+          orderNumber: true,
+          total: true,
+          status: true,
+          guestName: true,
+          guestPhone: true,
+          user: { select: { name: true, email: true } },
+        },
       }),
       db.product.findMany({
         where: { isActive: true, stock: { lte: 5, gte: 0 } },
@@ -135,7 +143,7 @@ export default async function AdminDashboard() {
                       </div>
                       <div>
                         <p className="font-medium text-sm text-gray-900">#{order.orderNumber}</p>
-                        <p className="text-xs text-gray-500">{order.user.name}</p>
+                        <p className="text-xs text-gray-500">{order.guestName || order.user?.name || "Guest"}</p>
                       </div>
                     </div>
                     <div className="text-right">
