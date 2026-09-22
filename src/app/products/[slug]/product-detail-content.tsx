@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
@@ -32,6 +32,18 @@ export function ProductDetailContent({ product, related }: Props) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
+
+  // Auto-scroll gallery: advance every 3 seconds (timer resets on manual selection)
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setTimeout(() => {
+      setSelectedImage((i) => (i + 1) % images.length);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [selectedImage, images.length]);
+
+  const prevImage = () => setSelectedImage((i) => (i - 1 + images.length) % images.length);
+  const nextImage = () => setSelectedImage((i) => (i + 1) % images.length);
   const { data: session } = useSession();
   const router = useRouter();
   const isAdmin = (session?.user as any)?.role === "ADMIN";
@@ -178,14 +190,15 @@ export function ProductDetailContent({ product, related }: Props) {
       <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
         {/* Image Gallery */}
         <div className="space-y-3">
-          {/* Main Image */}
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted">
+          {/* Main Image — auto-scrolling gallery */}
+          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted group">
             {images[selectedImage] ? (
               <Image
+                key={selectedImage}
                 src={images[selectedImage]}
-                alt={product.title}
+                alt={`${product.title} — image ${selectedImage + 1} of ${images.length}`}
                 fill
-                className="object-cover"
+                className="object-cover gallery-fade"
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
@@ -195,9 +208,61 @@ export function ProductDetailContent({ product, related }: Props) {
               </div>
             )}
             {discount > 0 && (
-              <Badge className="absolute top-3 left-3 bg-red-500 text-white border-0 text-sm">
+              <Badge className="absolute top-3 left-3 bg-red-500 text-white border-0 text-sm z-10">
                 {discount}% OFF
               </Badge>
+            )}
+
+            {/* Image counter */}
+            {images.length > 1 && (
+              <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/60 text-white text-xs font-medium backdrop-blur-sm z-10">
+                {selectedImage + 1} / {images.length}
+              </div>
+            )}
+
+            {/* Prev / Next arrows (appear on hover on desktop, always on mobile touch) */}
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  aria-label="Previous image"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-0 hover:bg-black/70 transition-all z-10 max-md:opacity-100"
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  aria-label="Next image"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 md:opacity-0 hover:bg-black/70 transition-all z-10 max-md:opacity-100"
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </>
+            )}
+
+            {/* Dot indicators + progress bar */}
+            {images.length > 1 && (
+              <div className="absolute bottom-3 left-0 right-0 flex flex-col items-center gap-1.5 z-10">
+                <div className="flex gap-1.5">
+                  {images.map((_: string, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => setSelectedImage(i)}
+                      aria-label={`Go to image ${i + 1}`}
+                      className={`h-2 rounded-full transition-all duration-300 ${
+                        selectedImage === i ? "w-6 bg-white" : "w-2 bg-white/50 hover:bg-white/80"
+                      }`}
+                    />
+                  ))}
+                </div>
+                {/* 3s countdown progress bar */}
+                <div className="w-24 h-0.5 rounded-full bg-white/30 overflow-hidden">
+                  <div
+                    key={`progress-${selectedImage}`}
+                    className="h-full bg-white rounded-full gallery-progress"
+                  />
+                </div>
+              </div>
             )}
           </div>
           {/* Thumbnails */}

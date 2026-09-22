@@ -432,3 +432,26 @@
   0% { transform: translateY(30px) scale(0.9); opacity: 0; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
+
+/* Product gallery: fade-in on slide change */
+.gallery-fade {
+  animation: galleryFade 0.5s ease-in-out;
+}
+@keyframes galleryFade {
+  from { opacity: 0; transform: scale(1.03); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Product gallery: 3s countdown progress bar */
+.gallery-progress {
+  width: 0%;
+  animation: galleryProgress 3s linear forwards;
+}
+@keyframes galleryProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gallery-progress { animation: none; width: 100%; }
+  .gallery-fade { animation: none; }
+}
