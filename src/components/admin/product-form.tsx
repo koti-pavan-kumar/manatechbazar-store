@@ -69,21 +69,34 @@ export function ProductForm({ product, categories, mode }: Props) {
   const [uploadError, setUploadError] = useState("");
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files?.length) return;
+    // Snapshot files FIRST, then reset the input — otherwise selecting the
+    // same file(s) again fires no change event and uploads silently no-op.
+    const files = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!files.length) return;
     setUploading(true);
     setUploadError("");
     try {
-      for (const file of Array.from(files)) {
+      // Upload sequentially, collecting results locally — referencing `images`
+      // inside the loop would drop every file except the last (stale closure).
+      const uploaded: string[] = [];
+      const failures: string[] = [];
+      for (const file of files) {
         const formData = new FormData();
         formData.append("file", file);
         const res = await fetch("/api/upload", { method: "POST", body: formData });
-        const data = await res.json();
+        const data = await res.json().catch(() => ({}));
         if (data.url) {
-          syncImages([...images, data.url]);
+          uploaded.push(data.url);
         } else {
-          setUploadError(data.error || "Upload failed — try pasting an image URL below instead");
+          failures.push(data.error || `${file.name} failed`);
         }
+      }
+      if (uploaded.length) {
+        syncImages([...images, ...uploaded]);
+      }
+      if (failures.length) {
+        setUploadError(failures[0]);
       }
     } catch {
       setUploadError("Upload failed — try pasting an image URL below instead");
