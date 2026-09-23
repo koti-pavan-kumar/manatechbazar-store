@@ -5,13 +5,21 @@ import { formatPrice } from "@/lib/utils";
 import Link from "next/link";
 import {
   Package, DollarSign, ShoppingCart, Users, TrendingUp, AlertTriangle, ArrowRight,
-  Store, Sparkles, ClipboardList,
+  Store, Sparkles, ClipboardList, Eye, Globe2, MousePointerClick,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ORDER_STATUS } from "@/lib/constants";
 
 export default async function AdminDashboard() {
-  const [totalProducts, totalOrders, totalCustomers, recentOrders, lowStockProducts, topProducts, revenueData] =
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+  const [
+    totalProducts, totalOrders, totalCustomers, recentOrders, lowStockProducts, topProducts, revenueData,
+    visitorsToday, visitors7d, pageviews7d, topPages, countryRows,
+  ] =
     await Promise.all([
       db.product.count({ where: { isActive: true } }),
       db.order.count(),
@@ -44,7 +52,59 @@ export default async function AdminDashboard() {
         _sum: { total: true },
         _count: true,
       }),
+      // Analytics: unique visitors today (last 30 days window kept small for speed)
+      db.pageView.findMany({
+        where: { createdAt: { gte: startOfToday } },
+        distinct: ["sessionId"],
+        select: { sessionId: true },
+      }),
+      db.pageView.findMany({
+        where: { createdAt: { gte: sevenDaysAgo } },
+        distinct: ["sessionId"],
+        select: { sessionId: true },
+      }),
+      db.pageView.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      db.pageView.groupBy({
+        by: ["path"],
+        where: { createdAt: { gte: thirtyDaysAgo } },
+        _count: { _all: true },
+        orderBy: { _count: { path: "desc" } },
+        take: 6,
+      }),
+      db.pageView.groupBy({
+        by: ["country"],
+        where: { createdAt: { gte: thirtyDaysAgo }, country: { not: null } },
+        _count: { _all: true },
+        orderBy: { _count: { country: "desc" } },
+        take: 5,
+      }),
     ]);
+
+  // Raw SQL: unique visitors per source (Prisma groupBy can't do COUNT(DISTINCT))
+  const sourceRows = await db.$queryRaw<
+    { source: string; visitors: bigint; views: bigint }[]
+  >`SELECT source, COUNT(DISTINCT "sessionId") AS visitors, COUNT(*) AS views FROM "PageView" WHERE "createdAt" >= ${thirtyDaysAgo} GROUP BY source ORDER BY views DESC LIMIT 8`;
+
+  const totalPageviews30d = await db.pageView.count({ where: { createdAt: { gte: thirtyDaysAgo } } });
+  const sourceTotal = sourceRows.reduce((s, r) => s + Number(r.views), 0) || 1;
+
+  const SOURCE_META: Record<string, { label: string; emoji: string; color: string }> = {
+    direct: { label: "Direct / typed URL", emoji: "🔗", color: "text-blue-600 bg-blue-50" },
+    instagram: { label: "Instagram", emoji: "📸", color: "text-pink-600 bg-pink-50" },
+    google: { label: "Google Search", emoji: "🔍", color: "text-green-600 bg-green-50" },
+    facebook: { label: "Facebook", emoji: "📘", color: "text-blue-700 bg-blue-50" },
+    youtube: { label: "YouTube", emoji: "▶️", color: "text-red-600 bg-red-50" },
+    whatsapp: { label: "WhatsApp", emoji: "💬", color: "text-emerald-600 bg-emerald-50" },
+    telegram: { label: "Telegram", emoji: "✈️", color: "text-sky-600 bg-sky-50" },
+    twitter: { label: "X / Twitter", emoji: "🐦", color: "text-slate-600 bg-slate-50" },
+    bing: { label: "Bing Search", emoji: "🔍", color: "text-cyan-600 bg-cyan-50" },
+    duckduckgo: { label: "DuckDuckGo", emoji: "🦆", color: "text-orange-600 bg-orange-50" },
+    reddit: { label: "Reddit", emoji: "🤖", color: "text-red-500 bg-red-50" },
+    pinterest: { label: "Pinterest", emoji: "📌", color: "text-rose-600 bg-rose-50" },
+    linkedin: { label: "LinkedIn", emoji: "💼", color: "text-blue-800 bg-blue-50" },
+  };
+
+  const sourceLabel = (s: string) => SOURCE_META[s] || { label: s, emoji: "🌐", color: "text-gray-600 bg-gray-50" };
 
   const totalRevenue = revenueData._sum.total || 0;
   const totalPaidOrders = revenueData._count || 0;
@@ -118,6 +178,103 @@ export default async function AdminDashboard() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Store Traffic */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between p-5 pb-3">
+          <h2 className="font-bold text-gray-900 flex items-center gap-2">
+            <Eye className="h-5 w-5 text-indigo-500" />
+            Store Traffic
+            <span className="text-xs font-normal text-gray-400">(last 30 days)</span>
+          </h2>
+          <span className="text-xs text-gray-400">Anonymous, cookie-free analytics</span>
+        </div>
+        <div className="px-5 pb-5 space-y-5">
+          {/* Headline numbers */}
+          <div className="grid grid-cols-3 gap-3">
+            <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
+              <p className="text-2xl font-black">{visitorsToday.length}</p>
+              <p className="text-[11px] opacity-90 mt-0.5">Visitors today</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-2xl font-black text-gray-900">{visitors7d.length}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Visitors (7 days)</p>
+            </div>
+            <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
+              <p className="text-2xl font-black text-gray-900">{totalPageviews30d}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Page views (30 days)</p>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-5">
+            {/* Traffic sources */}
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                <MousePointerClick className="h-3.5 w-3.5" /> Where visitors come from
+              </p>
+              {sourceRows.length > 0 ? (
+                <div className="space-y-2">
+                  {sourceRows.map((row) => {
+                    const meta = sourceLabel(row.source);
+                    const pct = Math.round((Number(row.views) / sourceTotal) * 100);
+                    return (
+                      <div key={row.source} className="p-2.5 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-800 flex items-center gap-2">
+                            <span className={`w-6 h-6 rounded-md ${meta.color} flex items-center justify-center text-xs`}>{meta.emoji}</span>
+                            {meta.label}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            <strong className="text-gray-900">{Number(row.visitors)}</strong> visitors · {pct}%
+                          </span>
+                        </div>
+                        <div className="mt-1.5 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                          <div className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-400 py-4 text-center">No visitors tracked yet</p>
+              )}
+            </div>
+
+            {/* Top pages + countries */}
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex items-center gap-1">
+                  <Globe2 className="h-3.5 w-3.5" /> Most viewed pages
+                </p>
+                {topPages.length > 0 ? (
+                  <div className="space-y-1.5">
+                    {topPages.map((p) => (
+                      <div key={p.path} className="flex items-center justify-between text-sm px-2.5 py-1.5 rounded-lg hover:bg-gray-50">
+                        <span className="font-mono text-xs text-gray-600 truncate max-w-[60%]">{p.path}</span>
+                        <span className="text-xs font-bold text-gray-900">{p._count._all}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 py-2">—</p>
+                )}
+              </div>
+              {countryRows.length > 0 && (
+                <div>
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">🌍 Top countries</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {countryRows.map((c) => (
+                      <span key={c.country} className="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-medium">
+                        {c.country} · {c._count._all}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6">

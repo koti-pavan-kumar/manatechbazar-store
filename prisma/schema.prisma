@@ -286,6 +286,26 @@ model StoreSetting {
   updatedAt            DateTime @updatedAt
 }
 
+// ─── Analytics ─────────────────────────────────────────────────
+// Privacy-friendly, self-hosted page analytics (no third-party tracker).
+// sessionId is a random client-generated UUID — no PII, no cookies.
+model PageView {
+  id        String   @id @default(cuid())
+  sessionId String
+  path      String
+  referrer  String?  // raw referrer URL (truncated)
+  source    String   @default("direct") // direct | instagram | google | facebook | youtube | twitter | telegram | whatsapp | bing | duckduckgo | other
+  utmSource String?  // from ?utm_source=
+  utmMedium String?
+  country   String?  // from Vercel edge header (x-vercel-ip-country)
+  device    String   @default("desktop") // mobile | tablet | desktop
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([sessionId, createdAt])
+  @@index([source])
+}
+
 model VerificationCode {
   id        String   @id @default(cuid())
   email     String
