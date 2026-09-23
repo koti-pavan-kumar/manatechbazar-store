@@ -9,16 +9,46 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ORDER_STATUS } from "@/lib/constants";
+import { TrafficRangeSelect } from "@/components/admin/traffic-range-select";
+import { Suspense } from "react";
 
-export default async function AdminDashboard() {
+const RANGE_LABELS: Record<string, string> = {
+  today: "today",
+  week: "last 7 days",
+  month: "last 30 days",
+  lifetime: "all time",
+};
+
+function rangeStart(range: string, now: Date): Date {
+  switch (range) {
+    case "today":
+      return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    case "week":
+      return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    case "lifetime":
+      return new Date(0);
+    case "month":
+    default:
+      return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  }
+}
+
+export default async function AdminDashboard({
+  searchParams,
+}: {
+  searchParams: Promise<{ range?: string }>;
+}) {
+  const { range: rawRange } = await searchParams;
+  const range = rawRange && RANGE_LABELS[rawRange] ? rawRange : "month";
+  const rangeLabel = RANGE_LABELS[range];
+
   const now = new Date();
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const start = rangeStart(range, now);
 
   const [
     totalProducts, totalOrders, totalCustomers, recentOrders, lowStockProducts, topProducts, revenueData,
-    visitorsToday, visitors7d, pageviews7d, topPages, countryRows,
+    visitorsToday, rangeVisitors, rangePageviews, topPages, countryRows,
   ] =
     await Promise.all([
       db.product.count({ where: { isActive: true } }),
@@ -52,28 +82,29 @@ export default async function AdminDashboard() {
         _sum: { total: true },
         _count: true,
       }),
-      // Analytics: unique visitors today (last 30 days window kept small for speed)
+      // Analytics: unique visitors today (always shown regardless of range)
       db.pageView.findMany({
         where: { createdAt: { gte: startOfToday } },
         distinct: ["sessionId"],
         select: { sessionId: true },
       }),
+      // Analytics: unique visitors + page views for the selected range
       db.pageView.findMany({
-        where: { createdAt: { gte: sevenDaysAgo } },
+        where: { createdAt: { gte: start } },
         distinct: ["sessionId"],
         select: { sessionId: true },
       }),
-      db.pageView.count({ where: { createdAt: { gte: sevenDaysAgo } } }),
+      db.pageView.count({ where: { createdAt: { gte: start } } }),
       db.pageView.groupBy({
         by: ["path"],
-        where: { createdAt: { gte: thirtyDaysAgo } },
+        where: { createdAt: { gte: start } },
         _count: { _all: true },
         orderBy: { _count: { path: "desc" } },
         take: 6,
       }),
       db.pageView.groupBy({
         by: ["country"],
-        where: { createdAt: { gte: thirtyDaysAgo }, country: { not: null } },
+        where: { createdAt: { gte: start }, country: { not: null } },
         _count: { _all: true },
         orderBy: { _count: { country: "desc" } },
         take: 5,
@@ -83,9 +114,8 @@ export default async function AdminDashboard() {
   // Raw SQL: unique visitors per source (Prisma groupBy can't do COUNT(DISTINCT))
   const sourceRows = await db.$queryRaw<
     { source: string; visitors: bigint; views: bigint }[]
-  >`SELECT source, COUNT(DISTINCT "sessionId") AS visitors, COUNT(*) AS views FROM "PageView" WHERE "createdAt" >= ${thirtyDaysAgo} GROUP BY source ORDER BY views DESC LIMIT 8`;
+  >`SELECT source, COUNT(DISTINCT "sessionId") AS visitors, COUNT(*) AS views FROM "PageView" WHERE "createdAt" >= ${start} GROUP BY source ORDER BY views DESC LIMIT 8`;
 
-  const totalPageviews30d = await db.pageView.count({ where: { createdAt: { gte: thirtyDaysAgo } } });
   const sourceTotal = sourceRows.reduce((s, r) => s + Number(r.views), 0) || 1;
 
   const SOURCE_META: Record<string, { label: string; emoji: string; color: string }> = {
@@ -186,24 +216,26 @@ export default async function AdminDashboard() {
           <h2 className="font-bold text-gray-900 flex items-center gap-2">
             <Eye className="h-5 w-5 text-indigo-500" />
             Store Traffic
-            <span className="text-xs font-normal text-gray-400">(last 30 days)</span>
+            <span className="text-xs font-normal text-gray-400">({rangeLabel})</span>
           </h2>
-          <span className="text-xs text-gray-400">Anonymous, cookie-free analytics</span>
+          <Suspense fallback={<div className="h-9 w-[170px]" />}>
+            <TrafficRangeSelect value={range} />
+          </Suspense>
         </div>
         <div className="px-5 pb-5 space-y-5">
           {/* Headline numbers */}
           <div className="grid grid-cols-3 gap-3">
             <div className="p-4 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 text-white shadow-md">
-              <p className="text-2xl font-black">{visitorsToday.length}</p>
-              <p className="text-[11px] opacity-90 mt-0.5">Visitors today</p>
+              <p className="text-2xl font-black">{rangeVisitors.length}</p>
+              <p className="text-[11px] opacity-90 mt-0.5">Visitors ({rangeLabel})</p>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
-              <p className="text-2xl font-black text-gray-900">{visitors7d.length}</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Visitors (7 days)</p>
+              <p className="text-2xl font-black text-gray-900">{rangePageviews}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Page views ({rangeLabel})</p>
             </div>
             <div className="p-4 rounded-xl bg-gray-50 border border-gray-100">
-              <p className="text-2xl font-black text-gray-900">{totalPageviews30d}</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Page views (30 days)</p>
+              <p className="text-2xl font-black text-gray-900">{visitorsToday.length}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">Visitors today</p>
             </div>
           </div>
 
