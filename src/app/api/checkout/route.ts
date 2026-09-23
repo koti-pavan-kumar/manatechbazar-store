@@ -60,18 +60,49 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Calculate totals server-side (never trust client)
+    // Fetch live products from DB — never trust client prices, titles, or existence
+    const productIds = cartItems.map((item: any) => item.id);
+    const liveProducts = await db.product.findMany({
+      where: { id: { in: productIds } },
+    });
+    const liveById = new Map(liveProducts.map((p) => [p.id, p]));
+
+    // Validate existence, active status and stock
+    for (const item of cartItems) {
+      const product = liveById.get(item.id);
+      if (!product || !product.isActive) {
+        return NextResponse.json(
+          { error: `"${item.title || "An item"}" is no longer available and was removed from your cart` },
+          { status: 400 }
+        );
+      }
+      if (product.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `"${product.title}" is out of stock or has insufficient quantity` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Calculate totals server-side from DB prices
     let subtotal = 0;
+    let hasFreeShipping = false;
     const processedItems = cartItems.map((item: any) => {
-      const itemTotal = item.price * item.quantity;
-      const itemDiscount = (item.mrp - item.price) * item.quantity;
+      const product = liveById.get(item.id)!;
+      const price = product.price;
+      const itemTotal = price * item.quantity;
+      const itemDiscount = (product.mrp - price) * item.quantity;
       subtotal += itemTotal;
+      if (product.freeShipping) hasFreeShipping = true;
+      const images = (() => {
+        try { return JSON.parse(product.images || "[]"); } catch { return []; }
+      })();
       return {
-        productId: item.id,
-        title: item.title,
-        image: item.image,
-        mrp: item.mrp,
-        priceAtPurchase: item.price,
+        productId: product.id,
+        title: product.title,
+        image: images[0] || item.image,
+        mrp: product.mrp,
+        priceAtPurchase: price,
         discountAtPurchase: itemDiscount,
         quantity: item.quantity,
         total: itemTotal,
@@ -100,21 +131,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Check if any item has free shipping
-    const hasFreeShipping = cartItems.some((item: any) => item.freeShipping);
     const shipping = hasFreeShipping || subtotal >= 49900 ? 0 : 4900;
     const total = Math.max(1, subtotal - couponDiscount + shipping);
-
-    // Check stock
-    for (const item of cartItems) {
-      const product = await db.product.findUnique({ where: { id: item.id } });
-      if (!product || product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `"${item.title}" is out of stock or has insufficient quantity` },
-          { status: 400 }
-        );
-      }
-    }
 
     const orderNumber = generateOrderNumber();
 
