@@ -159,6 +159,8 @@ model Order {
   couponCode         String?
   notes              String?
   cancelReason       String?
+  paidAt             DateTime?  // exact moment payment was confirmed
+  failedAt           DateTime?  // exact moment payment failed / expired
   shippedAt          DateTime?
   deliveredAt        DateTime?
   // Guest checkout fields

@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
         razorpayPaymentId: razorpay_payment_id,
         razorpaySignature: razorpay_signature,
         status: "PLACED",
+        paidAt: new Date(),
       },
     });
 

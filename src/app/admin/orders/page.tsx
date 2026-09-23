@@ -43,6 +43,19 @@ function dateStart(range: string): Date | null {
   }
 }
 
+/** Exact date + time, e.g. "23 Sep 2026, 04:35 PM" (viewer's local timezone) */
+function fmtDT(value: string | Date | null | undefined): string {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 const selectClass =
   "h-10 px-3 pr-8 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none cursor-pointer hover:bg-gray-50 transition-colors";
 
@@ -313,11 +326,30 @@ export default function AdminOrdersPage() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {order.guestName || order.user?.name || "Guest"} • {order.guestPhone || order.user?.phone || ""} • {new Date(order.createdAt).toLocaleDateString("en-IN")}
+                      {order.guestName || order.user?.name || "Guest"} • {order.guestPhone || order.user?.phone || ""}
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {order.items?.length} item(s) • {formatPrice(order.total)}
                     </p>
+                    {/* Exact event timestamps */}
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-xs">
+                      <span className="text-gray-600">📅 Placed: <strong>{fmtDT(order.createdAt)}</strong></span>
+                      {order.paymentStatus === "PAID" && (
+                        <span className="text-green-600">💳 Paid: <strong>{fmtDT(order.paidAt || order.updatedAt)}</strong></span>
+                      )}
+                      {order.paymentStatus === "FAILED" && (
+                        <span className="text-red-600">❌ Payment failed: <strong>{fmtDT(order.failedAt || order.updatedAt)}</strong></span>
+                      )}
+                      {order.paymentStatus === "PENDING" && (
+                        <span className="text-amber-600">⏳ Last update: {fmtDT(order.updatedAt)}</span>
+                      )}
+                      {order.shippedAt && (
+                        <span className="text-blue-600">📦 Shipped: <strong>{fmtDT(order.shippedAt)}</strong></span>
+                      )}
+                      {order.deliveredAt && (
+                        <span className="text-green-700">📬 Delivered: <strong>{fmtDT(order.deliveredAt)}</strong></span>
+                      )}
+                    </div>
                     {order.address && (
                       <p className="text-xs text-muted-foreground mt-1">
                         📍 {order.address.line1}, {order.address.city}, {order.address.state} - {order.address.pincode}

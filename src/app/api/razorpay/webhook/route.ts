@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
             paymentStatus: "PAID",
             razorpayPaymentId,
             status: "PLACED",
+            paidAt: new Date(),
           },
         });
 
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
       if (existingOrder) {
         await db.order.update({
           where: { id: existingOrder.id },
-          data: { paymentStatus: "FAILED", status: "PAYMENT_FAILED" },
+          data: { paymentStatus: "FAILED", status: "PAYMENT_FAILED", failedAt: new Date() },
         });
       }
     }

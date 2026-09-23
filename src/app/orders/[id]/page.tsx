@@ -66,8 +66,25 @@ export default function OrderDetailPage() {
         <div>
           <h1 className="text-2xl font-bold">Order #{order.orderNumber}</h1>
           <p className="text-sm text-muted-foreground">
-            Placed on {new Date(order.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}
+            Placed on {new Date(order.createdAt).toLocaleString("en-IN", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            })}
           </p>
+          {order.paymentStatus === "PAID" && order.paidAt && (
+            <p className="text-xs text-green-600 mt-0.5">
+              💳 Payment received: {new Date(order.paidAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+            </p>
+          )}
+          {order.paymentStatus === "FAILED" && (
+            <p className="text-xs text-red-500 mt-0.5">
+              ❌ Payment failed: {new Date(order.failedAt || order.updatedAt).toLocaleString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: true })}
+            </p>
+          )}
         </div>
         <Badge className={cn("text-sm", ORDER_STATUS[order.status]?.color)}>
           {ORDER_STATUS[order.status]?.label}
@@ -83,6 +100,12 @@ export default function OrderDetailPage() {
                 const Icon = step.icon;
                 const isActive = i <= currentStepIndex;
                 const isCurrent = i === currentStepIndex;
+                // Exact timestamp for each completed step
+                const stepTime =
+                  step.key === "PLACED" ? order.createdAt :
+                  step.key === "CONFIRMED" ? (order.paidAt || order.createdAt) :
+                  step.key === "SHIPPED" ? order.shippedAt :
+                  step.key === "DELIVERED" ? order.deliveredAt : null;
                 return (
                   <div key={step.key} className="flex flex-col items-center flex-1">
                     <div className={cn(
@@ -95,6 +118,11 @@ export default function OrderDetailPage() {
                     <span className={cn("text-xs font-medium text-center", isActive ? "text-green-600" : "text-muted-foreground")}>
                       {step.label}
                     </span>
+                    {isActive && stepTime && (
+                      <span className="text-[10px] text-muted-foreground text-center mt-0.5 leading-tight">
+                        {new Date(stepTime).toLocaleString("en-IN", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: true })}
+                      </span>
+                    )}
                   </div>
                 );
               })}

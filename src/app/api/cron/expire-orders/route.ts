@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
         data: {
           status: "CANCELLED",
           paymentStatus: "FAILED",
+          failedAt: new Date(),
           cancelReason: "Payment not completed within 15 minutes",
         },
       });
