@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { formatPrice } from "@/lib/utils";
 import { ORDER_STATUS } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
@@ -291,7 +292,12 @@ export default function AdminOrdersPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-bold text-sm">#{order.orderNumber}</p>
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="font-bold text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                      >
+                        #{order.orderNumber}
+                      </Link>
                       {/*
                         Primary badge = TRUE order state.
                         A failed/pending payment must never read as "Order Placed" —
@@ -372,6 +378,12 @@ export default function AdminOrdersPage() {
                         <Loader2 className="absolute right-2 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin" />
                       )}
                     </div>
+                    <Link
+                      href={`/admin/orders/${order.id}`}
+                      className="h-10 px-4 inline-flex items-center rounded-lg border border-indigo-200 bg-indigo-50 text-indigo-700 text-sm font-medium hover:bg-indigo-100 transition-colors whitespace-nowrap"
+                    >
+                      View full details
+                    </Link>
                   </div>
                 </div>
               </CardContent>
