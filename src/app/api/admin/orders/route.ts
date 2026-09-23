@@ -47,6 +47,15 @@ export async function PUT(req: NextRequest) {
   try {
     const { orderId, status } = await req.json();
 
+    // Whitelist valid statuses — never trust the client
+    const VALID_STATUSES = ["PLACED", "CONFIRMED", "SHIPPED", "DELIVERED", "CANCELLED"];
+    if (!orderId || typeof orderId !== "string") {
+      return NextResponse.json({ error: "Order ID is required" }, { status: 400 });
+    }
+    if (!VALID_STATUSES.includes(status)) {
+      return NextResponse.json({ error: "Invalid order status" }, { status: 400 });
+    }
+
     const updateData: any = { status };
 
     if (status === "SHIPPED") {

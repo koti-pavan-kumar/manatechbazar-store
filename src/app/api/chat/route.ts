@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { formatPrice, safeJsonParse } from "@/lib/utils";
+import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
+  // Rate limit: the chatbot calls a paid LLM API upstream — without
+  // this, bots could drain the free quota in minutes.
+  const ip = getClientIp(req);
+  const rl = rateLimit(ip, {
+    key: "chat",
+    maxRequests: 20,
+    windowMs: 60 * 1000,
+  });
+  if (!rl.allowed) {
+    return rateLimitResponse(rl);
+  }
+
   try {
     const { message } = await req.json();
-    if (!message) {
+    if (!message || typeof message !== "string" || !message.trim()) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 

@@ -47,7 +47,10 @@ export async function sendVerificationCode(
 
   // Send email via Resend
   if (!resend) {
-    console.log(`📧 Verification code for ${email}: ${code} (RESEND_API_KEY not configured — add it to Vercel env vars to send real emails)`);
+    // Only expose the code in local development — never in production.
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`📧 Verification code for ${email}: ${code} (RESEND_API_KEY not configured — add it to Vercel env vars to send real emails)`);
+    }
     return { success: true, message: "Verification code sent!" };
   }
 

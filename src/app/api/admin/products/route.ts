@@ -23,6 +23,29 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Validate types & ranges — never write unvalidated input to the DB
+    if (typeof title !== "string" || title.trim().length < 1 || title.length > 200) {
+      return NextResponse.json({ error: "Title must be 1-200 characters" }, { status: 400 });
+    }
+    if (typeof description !== "string" || description.length > 10000) {
+      return NextResponse.json({ error: "Description is too long" }, { status: 400 });
+    }
+    const mrpNum = Number(mrp);
+    const priceNum = Number(price);
+    const stockNum = Number(stock);
+    if (!Number.isFinite(mrpNum) || mrpNum < 1 || !Number.isFinite(priceNum) || priceNum < 1) {
+      return NextResponse.json({ error: "Prices must be positive numbers" }, { status: 400 });
+    }
+    if (priceNum > mrpNum) {
+      return NextResponse.json({ error: "Selling price cannot be higher than MRP" }, { status: 400 });
+    }
+    if (!Number.isInteger(stockNum) || stockNum < 0) {
+      return NextResponse.json({ error: "Stock must be a whole number" }, { status: 400 });
+    }
+    if (!Array.isArray(images) || !Array.isArray(categoryIds)) {
+      return NextResponse.json({ error: "Invalid images or categories" }, { status: 400 });
+    }
+
     let slug = slugify(title);
     // Ensure unique slug
     const existing = await db.product.findUnique({ where: { slug } });
@@ -45,6 +68,7 @@ export async function POST(req: NextRequest) {
         isActive: isActive ?? true,
         isFeatured: isFeatured ?? false,
         isDealOfTheDay: isDealOfTheDay ?? false,
+        freeShipping: freeShipping ?? false,
         images: JSON.stringify(images),
         tags: JSON.stringify(tags ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
         categoryProducts: {
@@ -82,6 +106,23 @@ export async function PUT(req: NextRequest) {
 
     const body = await req.json();
     const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, categoryIds, tags, images } = body;
+
+    // Validate before writing — same rules as create
+    if (typeof title !== "string" || title.trim().length < 1 || title.length > 200) {
+      return NextResponse.json({ error: "Title must be 1-200 characters" }, { status: 400 });
+    }
+    const mrpNum = Number(mrp);
+    const priceNum = Number(price);
+    const stockNum = Number(stock);
+    if (!Number.isFinite(mrpNum) || mrpNum < 1 || !Number.isFinite(priceNum) || priceNum < 1) {
+      return NextResponse.json({ error: "Prices must be positive numbers" }, { status: 400 });
+    }
+    if (priceNum > mrpNum) {
+      return NextResponse.json({ error: "Selling price cannot be higher than MRP" }, { status: 400 });
+    }
+    if (!Number.isInteger(stockNum) || stockNum < 0) {
+      return NextResponse.json({ error: "Stock must be a whole number" }, { status: 400 });
+    }
 
     const discountPercent = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
 
@@ -128,6 +169,24 @@ export async function DELETE(req: NextRequest) {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
     if (!id) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
+
+    // Products referenced by order history cannot be hard-deleted
+    // (foreign key protection) — archive them instead so past orders
+    // keep working while the product disappears from the storefront.
+    const orderItemCount = await db.orderItem.count({ where: { productId: id } });
+
+    if (orderItemCount > 0) {
+      const archived = await db.product.update({
+        where: { id },
+        data: { isActive: false },
+      });
+      return NextResponse.json({
+        success: true,
+        archived: true,
+        message: `This product has ${orderItemCount} order(s) attached, so it was hidden from the store instead of permanently deleted. Past orders still work.`,
+        product: archived,
+      });
+    }
 
     await db.product.delete({ where: { id } });
     return NextResponse.json({ success: true });

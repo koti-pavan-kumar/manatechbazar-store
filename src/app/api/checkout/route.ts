@@ -60,6 +60,33 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Validate cart items: ids must be strings, quantities positive integers
+    for (const item of cartItems) {
+      if (!item || typeof item.id !== "string" || !item.id) {
+        return NextResponse.json({ error: "Invalid cart item" }, { status: 400 });
+      }
+      const qty = Number(item.quantity);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 999) {
+        return NextResponse.json({ error: "Invalid quantity" }, { status: 400 });
+      }
+      item.quantity = qty;
+    }
+    if (cartItems.length > 50) {
+      return NextResponse.json({ error: "Cart too large" }, { status: 400 });
+    }
+
+    // Validate guest contact info
+    const phoneDigits = String(guestPhone).replace(/[^0-9]/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 15) {
+      return NextResponse.json({ error: "Please enter a valid phone number" }, { status: 400 });
+    }
+    if (String(guestName).trim().length < 2 || String(guestName).length > 100) {
+      return NextResponse.json({ error: "Please enter a valid name" }, { status: 400 });
+    }
+    if (!/^[0-9]{6}$/.test(String(addressFields.pincode))) {
+      return NextResponse.json({ error: "Please enter a valid 6-digit pincode" }, { status: 400 });
+    }
+
     // Fetch live products from DB — never trust client prices, titles, or existence
     const productIds = cartItems.map((item: any) => item.id);
     const liveProducts = await db.product.findMany({

@@ -7,13 +7,23 @@ export async function POST(req: NextRequest) {
     const body = await req.text();
     const signature = req.headers.get("x-razorpay-signature") || "";
 
-    // Verify webhook signature
+    // Verify webhook signature — refuse to process if the secret is not
+    // configured (an empty secret would make the check meaningless).
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    if (!webhookSecret) {
+      console.error("RAZORPAY_WEBHOOK_SECRET is not configured — rejecting webhook");
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+    }
+
     const expectedSignature = crypto
-      .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET || "")
+      .createHmac("sha256", webhookSecret)
       .update(body)
       .digest("hex");
 
-    if (expectedSignature !== signature) {
+    // Constant-time comparison to prevent timing attacks
+    const a = Buffer.from(expectedSignature, "utf8");
+    const b = Buffer.from(signature, "utf8");
+    if (a.length !== b.length || a.length === 0 || !crypto.timingSafeEqual(a, b)) {
       return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
     }
 
@@ -31,9 +41,10 @@ export async function POST(req: NextRequest) {
       });
 
       if (existingOrder && existingOrder.paymentStatus !== "PAID") {
-        // Activate the order
-        await db.order.update({
-          where: { id: existingOrder.id },
+        // Activate the order atomically — updateMany with a status guard
+        // ensures verify + webhook can never double-decrement stock.
+        const activated = await db.order.updateMany({
+          where: { id: existingOrder.id, paymentStatus: { not: "PAID" } },
           data: {
             paymentStatus: "PAID",
             razorpayPaymentId,
@@ -41,12 +52,14 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        // Decrement stock
-        for (const item of existingOrder.items) {
-          await db.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.quantity } },
-          });
+        // Decrement stock only if WE won the race (first confirmation)
+        if (activated.count > 0) {
+          for (const item of existingOrder.items) {
+            await db.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
         }
       }
     }

@@ -51,8 +51,11 @@ export async function sendOTPviaSMS(phone: string, otp: string): Promise<{ succe
   const apiKey = process.env.FAST2SMS_API_KEY;
 
   if (!apiKey) {
-    // In development, just log the OTP
-    console.log(`📱 [DEV] OTP for ${phone}: ${otp}`);
+    // NEVER log or expose OTPs in production — that would let anyone
+    // register with any phone number. Dev-only fallback.
+    if (process.env.NODE_ENV !== "production") {
+      console.log(`📱 [DEV] OTP for ${phone}: ${otp}`);
+    }
     return { success: true };
   }
 
@@ -93,8 +96,10 @@ export async function sendOTP(phone: string, type: string = "REGISTER"): Promise
   const result = await sendOTPviaSMS(phone, otp);
 
   if (result.success) {
-    // In dev mode, return the OTP for testing
-    const isDev = !process.env.FAST2SMS_API_KEY;
+    // Return the OTP ONLY in local development so testers can see it.
+    // In production this would be a critical auth bypass.
+    const isDev =
+      process.env.NODE_ENV !== "production" && !process.env.FAST2SMS_API_KEY;
     return { success: true, otp: isDev ? otp : undefined };
   } else {
     return { success: false, error: result.error };
