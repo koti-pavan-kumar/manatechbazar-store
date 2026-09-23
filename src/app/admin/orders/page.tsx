@@ -85,9 +85,11 @@ export default function AdminOrdersPage() {
       });
     }
 
-    if (status !== "all") list = list.filter((o) => o.status === status);
-    if (paymentStatus !== "all") list = list.filter((o) => o.paymentStatus === paymentStatus);
-    if (paymentMode !== "all") list = list.filter((o) => o.paymentMode === paymentMode);
+    // Exact-match filters, normalized against casing/null drift
+    if (status !== "all") list = list.filter((o) => (o.status || "").trim().toUpperCase() === status);
+    if (paymentStatus !== "all")
+      list = list.filter((o) => ((o.paymentStatus || "PENDING").trim() || "PENDING").toUpperCase() === paymentStatus);
+    if (paymentMode !== "all") list = list.filter((o) => (o.paymentMode || "").trim().toUpperCase() === paymentMode);
 
     const start = dateStart(dateRange);
     if (start) list = list.filter((o) => new Date(o.createdAt) >= start);
@@ -271,17 +273,38 @@ export default function AdminOrdersPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map((order) => (
-            <Card key={order.id}>
+            <Card className={order.paymentStatus === "FAILED" ? "border-red-200 bg-red-50/40" : ""}>
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="font-bold text-sm">#{order.orderNumber}</p>
-                      <Badge className={ORDER_STATUS[order.status]?.color || ""}>
-                        {ORDER_STATUS[order.status]?.label || order.status}
-                      </Badge>
-                      <Badge variant={order.paymentStatus === "PAID" ? "success" : "secondary"}>
-                        {order.paymentMode} — {order.paymentStatus}
+                      {/*
+                        Primary badge = TRUE order state.
+                        A failed/pending payment must never read as "Order Placed" —
+                        that was the confusion: order-status and payment-status are separate fields.
+                      */}
+                      {order.paymentStatus === "FAILED" ? (
+                        <Badge className="bg-red-100 text-red-700 border-transparent">❌ Payment Failed</Badge>
+                      ) : order.paymentStatus === "PENDING" && order.status === "PLACED" ? (
+                        <Badge className="bg-amber-100 text-amber-700 border-transparent">⏳ Awaiting Payment</Badge>
+                      ) : (
+                        <Badge className={ORDER_STATUS[order.status]?.color || ""}>
+                          {ORDER_STATUS[order.status]?.label || order.status}
+                        </Badge>
+                      )}
+                      <Badge
+                        variant={
+                          order.paymentStatus === "PAID"
+                            ? "success"
+                            : order.paymentStatus === "FAILED"
+                              ? "destructive"
+                              : "secondary"
+                        }
+                      >
+                        {order.paymentStatus === "FAILED"
+                          ? order.paymentMode
+                          : `${order.paymentMode} — ${order.paymentStatus}`}
                       </Badge>
                       {order.couponCode && (
                         <Badge variant="outline" className="text-orange-600 border-orange-200">
