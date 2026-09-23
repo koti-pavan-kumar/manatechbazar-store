@@ -116,7 +116,7 @@ GROQ_API_KEY=""
 
 - **Home page** — Hero carousel, announcement banner, category tiles, deal of the day countdown, new arrivals, Instagram CTA
 - **Product listing** — Filters by category, sort (price/popular/discount), search, price range
-- **Product detail** — Image gallery, MRP struck-through with discount badge, variants (size/color), ratings & reviews, related products, sticky mobile Add to Cart, WhatsApp order button
+- **Product detail** — Image gallery, MRP struck-through with discount badge, variants (size/color), ratings & reviews, related products, sticky mobile Add to Cart
 - **Cart** — Quantity controls, coupon application with live discount math, free-shipping progress bar
 - **Wishlist** — Heart toggle on all product cards, move-to-cart
 - **Checkout** — Saved address book, Razorpay (UPI/cards/wallets) and COD, server-side price calculation

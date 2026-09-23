@@ -6,7 +6,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import {
-  Heart, ShoppingCart, Star, Truck, Shield, ChevronLeft, MessageCircle,
+  Heart, ShoppingCart, Star, Truck, Shield, ChevronLeft,
   Minus, Plus, Share2, ChevronRight, Pencil, Trash2, Eye, EyeOff, Loader2, Zap, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -107,8 +107,6 @@ export function ProductDetailContent({ product, related }: Props) {
     });
   };
 
-  const whatsappMessage = `Hi! I'm interested in ${product.title} at ${formatPrice(currentPrice)}. Can you share more details?`;
-  const whatsappUrl = `https://wa.me/917893653255?text=${encodeURIComponent(whatsappMessage)}`;
 
   // Admin handlers
   const handleDelete = async () => {
@@ -441,17 +439,11 @@ export function ProductDetailContent({ product, related }: Props) {
                     )}
                   </Button>
                 </div>
-                {/* Wishlist + WhatsApp row */}
-                <div className="flex gap-2 w-full">
-                  <Button size="lg" variant="outline" onClick={handleWishlist} className="h-12 w-12 shrink-0 p-0">
-                    <Heart className={cn("h-5 w-5", isInWishlist && "fill-red-500 text-red-500")} />
-                  </Button>
-                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex-1 min-w-0">
-                    <Button size="lg" variant="outline" className="w-full h-12 border-green-500 text-green-600 hover:bg-green-50 text-sm sm:text-base">
-                      <MessageCircle className="h-4 w-4 mr-1 sm:mr-2 shrink-0" /> Order on WhatsApp
-                    </Button>
-                  </a>
-                </div>
+                {/* Wishlist row */}
+                <Button size="lg" variant="outline" onClick={handleWishlist} className="w-full h-12">
+                  <Heart className={cn("h-5 w-5 mr-2", isInWishlist && "fill-red-500 text-red-500")} />
+                  {isInWishlist ? "Saved to Wishlist" : "Add to Wishlist"}
+                </Button>
               </>
             ) : (
               <Button size="lg" className="w-full" disabled>

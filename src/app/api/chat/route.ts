@@ -63,7 +63,7 @@ RULES:
 - Keep responses concise (2-4 sentences max).
 - If asked about shipping: Free delivery above ₹499, otherwise ₹49 shipping.
 - Payment methods: UPI, Cards, Net Banking, Wallets (via Razorpay), or Cash on Delivery.
-- For WhatsApp orders, direct them to message the store.
+- Direct customers to buy through the website checkout, not through WhatsApp.
 
 CATALOG DATA:
 ${catalogContext}`;
