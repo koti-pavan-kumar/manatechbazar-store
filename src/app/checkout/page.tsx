@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -289,18 +291,80 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-green-500" />
-                Order Summary ({items.length} {items.length === 1 ? "item" : "items"})
+                Order Summary ({items.reduce((n, i) => n + i.quantity, 0)} {items.reduce((n, i) => n + i.quantity, 0) === 1 ? "item" : "items"})
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {items.map((item) => (
-                <div key={`${item.id}-${item.variantId}`} className="flex justify-between text-sm">
-                  <span className="flex-1">
-                    {item.title} {item.variantLabel ? `(${item.variantLabel})` : ""} × {item.quantity}
-                  </span>
-                  <span className="font-medium ml-2">{formatPrice(item.price * item.quantity)}</span>
-                </div>
-              ))}
+              {/* Full product cards — image, variant, qty, price, MRP, discount */}
+              <div className="space-y-2.5">
+                {items.map((item, i) => {
+                  const lineTotal = item.price * item.quantity;
+                  const saved = (item.mrp - item.price) * item.quantity;
+                  const discountPct = item.mrp > item.price ? Math.round(((item.mrp - item.price) / item.mrp) * 100) : 0;
+                  return (
+                    <div
+                      key={`${item.id}-${item.variantId}`}
+                      className="flex gap-3 p-3 rounded-2xl border bg-muted/30 animate-slide-in-up"
+                      style={{ animationDelay: `${i * 50}ms` }}
+                    >
+                      <Link
+                        href={`/products/${item.slug}`}
+                        className="relative w-16 h-20 sm:w-20 sm:h-24 shrink-0 rounded-xl overflow-hidden bg-muted img-zoom"
+                      >
+                        <Image
+                          src={item.image || "/placeholder-product.jpg"}
+                          alt={item.title}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
+                      </Link>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <Link
+                            href={`/products/${item.slug}`}
+                            className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors"
+                          >
+                            {item.title}
+                          </Link>
+                          <span className="font-bold text-sm shrink-0">{formatPrice(lineTotal)}</span>
+                        </div>
+                        {item.variantLabel && (
+                          <p className="text-xs text-muted-foreground mt-0.5">{item.variantLabel}</p>
+                        )}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+                          <span>Qty: {item.quantity}</span>
+                          <span>·</span>
+                          <span>{formatPrice(item.price)} each</span>
+                          {item.mrp > item.price && (
+                            <>
+                              <span className="line-through">{formatPrice(item.mrp)}</span>
+                              <span className="font-bold text-green-700 bg-green-100 rounded-full px-1.5 py-0.5">
+                                {discountPct}% OFF
+                              </span>
+                            </>
+                          )}
+                        </div>
+                        {(item.freeShipping || saved > 0) && (
+                          <div className="flex flex-wrap gap-1.5 mt-1.5">
+                            {item.freeShipping && (
+                              <span className="text-[10px] font-bold text-blue-700 bg-blue-100 rounded-full px-2 py-0.5">
+                                🚚 FREE Delivery
+                              </span>
+                            )}
+                            {saved > 0 && (
+                              <span className="text-[10px] font-bold text-green-700 bg-green-50 border border-green-100 rounded-full px-2 py-0.5">
+                                You save {formatPrice(saved)}
+                              </span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
               <div className="border-t pt-3 space-y-1 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
@@ -310,6 +374,12 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-green-600">
                     <span>Discount ({couponCode})</span>
                     <span>-{formatPrice(discount)}</span>
+                  </div>
+                )}
+                {items.reduce((n, i) => n + Math.max(0, i.mrp - i.price) * i.quantity, 0) > 0 && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Total savings vs MRP</span>
+                    <span>{formatPrice(items.reduce((n, i) => n + Math.max(0, i.mrp - i.price) * i.quantity, 0))}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
