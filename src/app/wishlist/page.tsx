@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useWishlistStore } from "@/stores/wishlist";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
+import { RatioBox } from "@/components/ratio-box";
 import { useRef, useEffect, useState } from "react";
 
 function RevealSection({ children, className = "", delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) {
@@ -178,7 +179,10 @@ export default function WishlistPage() {
               >
                 {/* Product Image */}
                 <Link href={`/products/${item.slug}`} className="block">
-                  <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]">
+                  <RatioBox
+                    src={item.image || "/placeholder-product.jpg"}
+                    className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 shadow-md hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02]"
+                  >
                     <Image
                       src={item.image || "/placeholder-product.jpg"}
                       alt={item.title}
@@ -202,7 +206,7 @@ export default function WishlistPage() {
                     </div>
                     {/* Floating hearts decoration */}
                     <div className="absolute -top-1 -right-1 text-lg opacity-0 group-hover:opacity-100 transition-opacity animate-bounce-in">💕</div>
-                  </div>
+                  </RatioBox>
                 </Link>
 
                 {/* Product Info */}

@@ -315,7 +315,7 @@ export default function CheckoutPage() {
                           src={item.image || "/placeholder-product.jpg"}
                           alt={item.title}
                           fill
-                          className="object-cover"
+                          className="object-contain"
                           sizes="80px"
                         />
                       </Link>

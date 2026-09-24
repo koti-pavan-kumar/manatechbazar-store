@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 import { useCallback, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { showToast } from "@/components/cart-toast";
+import { useImageRatio } from "@/lib/use-image-ratio";
 
 interface ProductCardProps {
   product: {
@@ -33,6 +34,8 @@ interface ProductCardProps {
 export function ProductCard({ product, priority = false }: ProductCardProps) {
   const images = safeJsonParse(product.images, []);
   const imageUrl = images[0] || "/placeholder-product.jpg";
+  // Show the image at the exact ratio it was uploaded at (no crop)
+  const imageRatio = useImageRatio(imageUrl);
   const discount = product.discountPercent || calcDiscount(product.mrp, product.price);
 
   const router = useRouter();
@@ -121,7 +124,10 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-muted transition-transform duration-300 ease-out"
-        style={{ transformStyle: "preserve-3d" }}
+        style={{
+          transformStyle: "preserve-3d",
+          ...(imageRatio ? { aspectRatio: imageRatio } : {}),
+        }}
       >
         {/* Product Image with zoom */}
         <div className="w-full h-full img-zoom">

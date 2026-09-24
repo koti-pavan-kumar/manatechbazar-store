@@ -20,7 +20,8 @@ import { showToast } from "@/components/cart-toast";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/label";
+import { useImageRatio } from "@/lib/use-image-ratio";
 
 interface Props {
   product: any;
@@ -30,6 +31,8 @@ interface Props {
 export function ProductDetailContent({ product, related }: Props) {
   const images = safeJsonParse(product.images, []);
   const [selectedImage, setSelectedImage] = useState(0);
+  // Gallery adopts the current image's uploaded ratio (never crops it)
+  const galleryRatio = useImageRatio(images[selectedImage]);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
 
@@ -189,7 +192,10 @@ export function ProductDetailContent({ product, related }: Props) {
         {/* Image Gallery */}
         <div className="space-y-3">
           {/* Main Image — auto-scrolling gallery */}
-          <div className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted group">
+          <div
+            className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted group transition-[aspect-ratio] duration-500"
+            style={galleryRatio ? { aspectRatio: galleryRatio } : undefined}
+          >
             {images[selectedImage] ? (
               <Image
                 key={selectedImage}

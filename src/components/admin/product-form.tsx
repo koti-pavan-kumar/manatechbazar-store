@@ -214,7 +214,7 @@ export function ProductForm({ product, categories, mode }: Props) {
               <div className="grid grid-cols-2 gap-2">
                 {images.map((img, i) => (
                   <div key={i} className="relative aspect-square rounded-lg overflow-hidden bg-muted group">
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img src={img} alt="" className="w-full h-full object-contain" />
                     <button
                       type="button"
                       onClick={() => syncImages(images.filter((_, j) => j !== i))}
