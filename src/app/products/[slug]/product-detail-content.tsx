@@ -425,8 +425,8 @@ export function ProductDetailContent({ product, related }: Props) {
               <>
                 {/* Main row: Buy Now + Add to Cart side by side */}
                 <div className="flex gap-2 w-full">
-                  <Button size="lg" className="flex-1 min-w-0 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white text-sm sm:text-base" onClick={handleBuyNow}>
-                    ⚡ Buy Now
+                  <Button size="lg" className="flex-1 min-w-0 bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] border border-[#FCD200] shadow-sm hover:shadow-md font-bold text-sm sm:text-base" onClick={handleBuyNow}>
+                    Buy Now
                   </Button>
                   <Button
                     size="lg"
@@ -640,8 +640,8 @@ export function ProductDetailContent({ product, related }: Props) {
             >
               {addedToCart ? <><Check className="h-3.5 w-3.5" /> </> : <><ShoppingCart className="h-3.5 w-3.5" /> Cart</>}
             </Button>
-            <Button size="sm" onClick={handleBuyNow} className="px-3 h-9 rounded-lg font-semibold text-[11px] bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shrink-0">
-              ⚡ Buy Now
+            <Button size="sm" onClick={handleBuyNow} className="px-3 h-9 rounded-lg font-bold text-[11px] bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] border border-[#FCD200] shrink-0">
+              Buy Now
             </Button>
           </div>
         </div>

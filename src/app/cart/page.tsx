@@ -243,7 +243,7 @@ export default function CartPage() {
 
             {/* Checkout Button */}
             <Link href="/checkout" className="block">
-              <Button size="lg" className="w-full h-13 rounded-2xl text-base font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 bg-gradient-to-r from-primary to-primary/90">
+              <Button size="lg" className="w-full h-13 rounded-2xl text-base font-bold text-[#0F1111] bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] shadow-lg shadow-amber-300/40 hover:shadow-xl hover:shadow-amber-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
                 Proceed to Checkout
                 <ArrowRight className="h-5 w-5 ml-2" />
               </Button>

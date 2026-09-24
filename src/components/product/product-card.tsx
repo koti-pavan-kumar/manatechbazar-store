@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Heart, ShoppingCart, Eye, Zap, Check } from "lucide-react";
+import { Heart, ShoppingCart, Eye, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice, calcDiscount, safeJsonParse } from "@/lib/utils";
@@ -181,9 +181,9 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
                 size="sm"
                 onClick={handleBuyNow}
                 disabled={buyingNow}
-                className="h-10 rounded-xl bg-gradient-to-r from-orange-500 to-red-500 text-white hover:from-orange-600 hover:to-red-600 shadow-lg font-semibold text-xs px-3"
+                className="h-10 rounded-xl bg-[#FFD814] hover:bg-[#F7CA00] text-[#0F1111] border border-[#FCD200] shadow-lg font-bold text-xs px-3"
               >
-                {buyingNow ? <Loader2 className="h-4 w-4 mr-1 animate-spin" /> : <Zap className="h-4 w-4 mr-1" />}
+                {buyingNow && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
                 {buyingNow ? "Loading..." : "Buy Now"}
               </Button>
               <Button
