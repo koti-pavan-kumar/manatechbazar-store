@@ -105,7 +105,6 @@ export function HomeContent({ data }: { data: HomeData }) {
   const prevSlide = () => goToSlide((currentSlide - 1 + heroSlides.length) % heroSlides.length);
   const nextSlide = () => goToSlide((currentSlide + 1) % heroSlides.length);
 
-  const hotSaleProducts = allProducts.filter((p) => p.price / 100 <= 199);
   const slide = heroSlides[currentSlide];
 
   return (
@@ -216,15 +215,6 @@ export function HomeContent({ data }: { data: HomeData }) {
             ))}
           </div>
           <p className="text-center text-sm text-muted-foreground mb-6">👆 Click a tab to see all deals in that price range</p>
-
-          {/* Featured Hot Sale Products (first 4) */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {hotSaleProducts.slice(0, 4).map((product: any, i: number) => (
-              <RevealSection key={product.id} delay={i * 80}>
-                <ProductCard product={product} />
-              </RevealSection>
-            ))}
-          </div>
         </section>
       </RevealSection>
 
