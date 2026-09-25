@@ -2,6 +2,8 @@
 
 export const STORE = {
   name: "Mana Tech Bazar",
+  // Canonical production domain — the only URL Google should ever see
+  siteUrl: "https://manatechbazar.in",
   description: "Your favourite store on Instagram",
   currency: "INR",
   currencySymbol: "₹",

@@ -1,8 +1,11 @@
 import { MetadataRoute } from "next";
 import { db } from "@/lib/prisma";
+import { STORE } from "@/lib/constants";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXTAUTH_URL || "https://manatechbazar.vercel.app";
+  // Always the canonical domain — never derive from NEXTAUTH_URL,
+  // which points at the Vercel deployment host (mentor's bug report).
+  const baseUrl = STORE.siteUrl;
 
   const [products, categories] = await Promise.all([
     db.product.findMany({

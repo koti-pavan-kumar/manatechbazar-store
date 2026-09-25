@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { validateEnv } from "@/lib/env";
+import { STORE } from "@/lib/constants";
 
 // Validate environment variables on server startup
 validateEnv();
@@ -18,6 +19,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(STORE.siteUrl),
+  alternates: {
+    canonical: "/",
+  },
   title: {
     default: "Mana Tech Bazar — Your Favourite Store",
     template: "%s | Mana Tech Bazar",
