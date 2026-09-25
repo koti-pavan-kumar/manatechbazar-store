@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { formatPrice } from "@/lib/utils";
 
 interface Message {
@@ -16,6 +17,9 @@ interface Message {
 
 export function ChatWidget() {
   const [open, setOpen] = useState(false);
+  // Product pages show a sticky Buy bar above the bottom nav — lift the FAB
+  // (and its window) so they never sit on top of Buy Now / Cart.
+  const overStickyBar = /^\/products\/[^/]+/.test(usePathname() ?? "");
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
@@ -63,7 +67,9 @@ export function ChatWidget() {
       {/* Toggle Button */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed bottom-[76px] left-4 lg:bottom-6 lg:left-6 z-50 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-110 flex items-center justify-center"
+        className={`fixed left-4 z-50 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:bg-primary/90 transition-all hover:scale-110 flex items-center justify-center lg:bottom-6 lg:left-6 ${
+          overStickyBar ? "bottom-[132px]" : "bottom-[76px]"
+        }`}
         aria-label="Ask Mohan"
       >
         {open ? <X className="h-6 w-6" /> : <Bot className="h-6 w-6" />}
@@ -71,7 +77,9 @@ export function ChatWidget() {
 
       {/* Chat Window */}
       {open && (
-        <div className="fixed bottom-[140px] left-4 lg:bottom-20 lg:left-6 z-50 w-[calc(100vw-32px)] max-w-sm h-[400px] sm:h-[450px] rounded-2xl border bg-background shadow-2xl flex flex-col animate-slide-up overflow-hidden">
+        <div className={`fixed left-4 z-50 w-[calc(100vw-32px)] max-w-sm h-[400px] sm:h-[450px] rounded-2xl border bg-background shadow-2xl flex flex-col animate-slide-up overflow-hidden lg:bottom-20 lg:left-6 ${
+          overStickyBar ? "bottom-[196px]" : "bottom-[140px]"
+        }`}>
           {/* Header */}
           <div className="bg-primary text-primary-foreground p-4 flex items-center gap-3">
             <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">

@@ -72,7 +72,7 @@ export function Header() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-4">
+        <div className="mx-auto max-w-7xl px-3 sm:px-4 h-14 flex items-center justify-between gap-2 sm:gap-4">
           {/* Mobile menu button */}
           <button
             className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -83,8 +83,8 @@ export function Header() {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <span className="text-xl sm:text-2xl font-bold tracking-tight">Mana Tech Bazar</span>
+          <Link href="/" className="flex items-center gap-2 min-w-0">
+            <span className="text-xl sm:text-2xl font-bold tracking-tight truncate min-w-0">Mana Tech Bazar</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -130,7 +130,7 @@ export function Header() {
               </Button>
             )}
 
-            <Link href="/wishlist" aria-label="Wishlist" className="relative">
+            <Link href="/wishlist" aria-label="Wishlist" className="relative hidden sm:flex">
               <Button variant="ghost" size="icon">
                 <Heart className="h-5 w-5" />
                 {wishlistCount > 0 && (
@@ -141,7 +141,7 @@ export function Header() {
               </Button>
             </Link>
 
-            <Link href="/cart" aria-label="Cart" className="relative">
+            <Link href="/cart" aria-label="Cart" className="relative hidden sm:flex">
               <Button variant="ghost" size="icon">
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (

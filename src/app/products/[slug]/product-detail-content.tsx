@@ -172,7 +172,7 @@ export function ProductDetailContent({ product, related }: Props) {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-3 sm:px-4 py-4 pb-28 lg:pb-8 w-full overflow-hidden">
+    <div className="mx-auto max-w-7xl px-3 sm:px-4 py-4 pb-36 lg:pb-8 w-full overflow-hidden">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-4 overflow-x-auto no-scrollbar">
         <Link href="/" className="hover:text-foreground shrink-0">Home</Link>
@@ -188,9 +188,9 @@ export function ProductDetailContent({ product, related }: Props) {
         )}
       </nav>
 
-      <div className="grid lg:grid-cols-2 gap-6 lg:gap-10">
+      <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 gap-6 lg:gap-10">
         {/* Image Gallery */}
-        <div className="space-y-3">
+        <div className="space-y-3 min-w-0">
           {/* Main Image — auto-scrolling gallery */}
           <div
             className="relative aspect-[4/5] overflow-hidden rounded-2xl bg-muted group transition-[aspect-ratio] duration-500"
@@ -289,7 +289,7 @@ export function ProductDetailContent({ product, related }: Props) {
         </div>
 
         {/* Product Info */}
-        <div className="space-y-5">
+        <div className="space-y-5 min-w-0">
           {/* Title & Rating */}
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{product.title}</h1>
@@ -627,7 +627,7 @@ export function ProductDetailContent({ product, related }: Props) {
 
       {/* Sticky Mobile Buy Now + Add to Cart */}
       {currentStock > 0 && (
-        <div className="fixed bottom-[60px] left-0 right-0 border-t bg-background/95 backdrop-blur p-2.5 lg:hidden z-40 w-full max-w-full">
+        <div className="fixed bottom-[64px] left-0 right-0 border-t bg-background/95 backdrop-blur p-2.5 lg:hidden z-40 w-full max-w-full">
           <div className="flex items-center gap-2 w-full max-w-full px-1">
             <div className="flex-1 min-w-0 overflow-hidden">
               <p className="text-xs text-muted-foreground truncate">{product.title}</p>
