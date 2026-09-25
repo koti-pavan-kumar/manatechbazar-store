@@ -123,13 +123,14 @@ export function InstagramReels() {
             {muted[idx] ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
 
-          {/* Open the reel on Instagram */}
+          {/* Open the reel on Instagram (bottom-left: the top of the card
+              can sit under the sticky site header when scrolled) */}
           <a
             href={`https://www.instagram.com/reel/${reel.code}/`}
             target="_blank"
             rel="noopener noreferrer"
             aria-label={`Watch reel ${idx + 1} on Instagram`}
-            className="absolute top-3 right-3 z-10 rounded-full bg-black/60 backdrop-blur-sm p-2.5 text-white hover:bg-pink-600 transition-colors"
+            className="absolute bottom-3 left-3 z-10 rounded-full bg-black/60 backdrop-blur-sm p-2.5 text-white hover:bg-pink-600 transition-colors"
           >
             <Instagram className="h-4 w-4" />
           </a>

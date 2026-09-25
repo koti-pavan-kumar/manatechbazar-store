@@ -57,6 +57,16 @@ function fmtDT(value: string | Date | null | undefined): string {
   });
 }
 
+/** "LCD Writing Tablet ×2, Garden Hose + 1 more" — product names on the order card. */
+function itemsSummary(order: any): string {
+  const items = order.items || [];
+  if (items.length === 0) return "No items";
+  const label = (i: any) => `${i.title || "Untitled product"}${i.quantity > 1 ? ` ×${i.quantity}` : ""}`;
+  const shown = items.slice(0, 2).map(label).join(", ");
+  const extra = items.length - 2;
+  return extra > 0 ? `${shown} + ${extra} more` : shown;
+}
+
 const selectClass =
   "h-10 px-3 pr-8 rounded-lg border border-gray-200 bg-white text-sm font-medium text-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none appearance-none cursor-pointer hover:bg-gray-50 transition-colors";
 
@@ -291,10 +301,18 @@ export default function AdminOrdersPage() {
               <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex-1">
+                    {/* Customer name is the heading — that's who the admin is
+                        talking to. Order # sits beside it in small mono. */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <Link
                         href={`/admin/orders/${order.id}`}
-                        className="font-bold text-sm text-indigo-600 hover:text-indigo-800 hover:underline"
+                        className="font-bold text-base text-gray-900 hover:text-indigo-700 hover:underline"
+                      >
+                        {order.guestName || order.user?.name || "Guest"}
+                      </Link>
+                      <Link
+                        href={`/admin/orders/${order.id}`}
+                        className="text-xs font-mono text-gray-400 hover:text-indigo-600 hover:underline"
                       >
                         #{order.orderNumber}
                       </Link>
@@ -331,11 +349,12 @@ export default function AdminOrdersPage() {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {order.guestName || order.user?.name || "Guest"} • {order.guestPhone || order.user?.phone || ""}
+                    {/* Product names instead of a bare id */}
+                    <p className="text-sm font-medium text-gray-700 mt-1.5 line-clamp-2">
+                      📦 {itemsSummary(order)}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {order.items?.length} item(s) • {formatPrice(order.total)}
+                      {order.guestPhone || order.user?.phone || ""} • {order.items?.length} item(s) • {formatPrice(order.total)}
                     </p>
                     {/* Exact event timestamps */}
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1.5 text-xs">
