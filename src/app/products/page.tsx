@@ -1,13 +1,15 @@
 import { db } from "@/lib/prisma";
 import { ProductsContent } from "./products-content";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Shop All Products",
   description: "Browse our complete collection of products. Filter by category, price, and more.",
-};
+  path: "/products",
+});
 
 interface SearchParams {
   category?: string;

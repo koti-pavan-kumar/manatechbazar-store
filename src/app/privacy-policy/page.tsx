@@ -2,10 +2,13 @@ import { StoreLayout } from "@/components/layout/store-layout";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export const metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Privacy Policy — Mana Tech Bazar",
   description: "Privacy policy for Mana Tech Bazar",
-};
+  path: "/privacy-policy",
+});
 
 export default function PrivacyPolicyPage() {
   return (

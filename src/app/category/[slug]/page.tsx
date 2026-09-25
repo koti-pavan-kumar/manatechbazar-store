@@ -5,6 +5,7 @@ import { safeJsonParse } from "@/lib/utils";
 import Link from "next/link";
 import { ArrowLeft, Package } from "lucide-react";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -16,10 +17,13 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   const { slug } = await props.params;
   const category = await db.category.findUnique({ where: { slug } });
   if (!category) return { title: "Category Not Found" };
-  return {
+  return pageMetadata({
     title: `${category.name} — Shop Now`,
     description: `Browse our collection of ${category.name} products. Best prices at Mana Tech Bazar.`,
-  };
+    path: `/category/${category.slug}`,
+    image: category.image || undefined,
+    imageAlt: category.name,
+  });
 }
 
 export default async function CategoryPage(props: Props) {

@@ -2,10 +2,13 @@ import { StoreLayout } from "@/components/layout/store-layout";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export const metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Terms & Conditions — Mana Tech Bazar",
   description: "Terms and conditions for using Mana Tech Bazar",
-};
+  path: "/terms",
+});
 
 export default function TermsPage() {
   return (

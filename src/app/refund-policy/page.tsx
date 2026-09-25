@@ -2,10 +2,13 @@ import { StoreLayout } from "@/components/layout/store-layout";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export const metadata = {
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata = pageMetadata({
   title: "Refund & Cancellation Policy — Mana Tech Bazar",
   description: "Refund and cancellation policy for orders placed on Mana Tech Bazar",
-};
+  path: "/refund-policy",
+});
 
 export default function RefundPolicyPage() {
   return (

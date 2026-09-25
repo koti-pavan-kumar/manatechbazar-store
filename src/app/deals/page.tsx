@@ -1,5 +1,13 @@
 import { db } from "@/lib/prisma";
 import { DealsContent } from "./deals-content";
+import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = pageMetadata({
+  title: "Deals Under ₹199 — Grab Before They're Gone",
+  description: "Shop the best deals under ₹199 at Mana Tech Bazar. Limited stock, free delivery above ₹499.",
+  path: "/deals",
+});
 
 export const revalidate = 60;
 

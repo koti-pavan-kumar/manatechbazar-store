@@ -1,11 +1,13 @@
 import { db } from "@/lib/prisma";
 import { OffersContent } from "./offers-content";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Offers & Deals — Save Big Today!",
   description: "Check out our latest offers, coupon codes, and flash sales.",
-};
+  path: "/offers",
+});
 
 async function getOffers() {
   const [coupons, deals] = await Promise.all([

@@ -2,6 +2,7 @@ import { db } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { ProductDetailContent } from "./product-detail-content";
 import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -25,17 +26,17 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
   if (!product) return { title: "Product Not Found" };
 
   const images = typeof product.images === "string" ? JSON.parse(product.images) : product.images;
+  const description = product.description.slice(0, 160);
 
-  return {
+  // Absolute og:url + per-product og:image + canonical → rich preview
+  // when the link is shared on Instagram, WhatsApp, Twitter, etc.
+  return pageMetadata({
     title: product.title,
-    description: product.description.slice(0, 160),
-    openGraph: {
-      title: product.title,
-      description: product.description.slice(0, 160),
-      images: images[0] ? [{ url: images[0], width: 800, height: 600 }] : [],
-      type: "website",
-    },
-  };
+    description,
+    path: `/products/${product.slug}`,
+    image: images[0],
+    imageAlt: product.title,
+  });
 }
 
 export default async function ProductPage(props: Props) {

@@ -4,6 +4,7 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { validateEnv } from "@/lib/env";
 import { STORE } from "@/lib/constants";
+import { DEFAULT_OG_IMAGE } from "@/lib/seo";
 
 // Validate environment variables on server startup
 validateEnv();
@@ -20,9 +21,6 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(STORE.siteUrl),
-  alternates: {
-    canonical: "/",
-  },
   title: {
     default: "Mana Tech Bazar — Your Favourite Store",
     template: "%s | Mana Tech Bazar",
@@ -33,13 +31,17 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_IN",
     siteName: "Mana Tech Bazar",
+    url: STORE.siteUrl,
     title: "Mana Tech Bazar — Your Favourite Store",
     description: "Discover amazing products at the best prices.",
+    // Fallback share image for pages that don't define their own
+    images: [{ url: DEFAULT_OG_IMAGE, width: 1672, height: 941, alt: "Mana Tech Bazar" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mana Tech Bazar — Your Favourite Store",
     description: "Discover amazing products at the best prices.",
+    images: [DEFAULT_OG_IMAGE],
   },
   robots: { index: true, follow: true },
 };
