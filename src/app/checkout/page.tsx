@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
 import { STORE } from "@/lib/constants";
-import { CreditCard, Loader2, Check, MapPin, User, Phone } from "lucide-react";
+import { CreditCard, Loader2, Check, MapPin, User, Phone, Minus, Plus, Trash2 } from "lucide-react";
 
 declare global {
   interface Window {
@@ -35,7 +35,7 @@ const billingSchema = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, getSubtotal, couponCode, discount, clearCart } = useCartStore();
+  const { items, getSubtotal, couponCode, discount, clearCart, updateQuantity, removeItem } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"billing" | "payment">("billing");
 
@@ -278,7 +278,11 @@ export default function CheckoutPage() {
                 </div>
 
                 {step === "billing" && (
-                  <Button type="submit" size="lg" className="w-full h-12 rounded-xl font-semibold">
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full h-12 rounded-xl font-bold text-[#0F1111] bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] shadow-lg shadow-amber-300/40 hover:shadow-xl hover:shadow-amber-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                  >
                     Continue to Payment <Check className="h-4 w-4 ml-2" />
                   </Button>
                 )}
@@ -333,8 +337,6 @@ export default function CheckoutPage() {
                           <p className="text-xs text-muted-foreground mt-0.5">{item.variantLabel}</p>
                         )}
                         <div className="flex flex-wrap items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-                          <span>Qty: {item.quantity}</span>
-                          <span>·</span>
                           <span>{formatPrice(item.price)} each</span>
                           {item.mrp > item.price && (
                             <>
@@ -359,6 +361,38 @@ export default function CheckoutPage() {
                             )}
                           </div>
                         )}
+
+                        {/* Quantity stepper + remove */}
+                        <div className="flex items-center justify-between mt-2.5">
+                          <div className="flex items-center border rounded-lg overflow-hidden bg-background">
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity - 1, item.variantId)}
+                              aria-label={`Decrease quantity of ${item.title}`}
+                              className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors"
+                            >
+                              <Minus className="h-3.5 w-3.5" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-bold tabular-nums">{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
+                              disabled={item.quantity >= item.stock}
+                              aria-label={`Increase quantity of ${item.title}`}
+                              className="h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-muted transition-colors disabled:opacity-30"
+                            >
+                              <Plus className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.id, item.variantId)}
+                            aria-label={`Remove ${item.title} from order`}
+                            className="p-2 text-muted-foreground hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
@@ -399,7 +433,7 @@ export default function CheckoutPage() {
                   </div>
                   <Button
                     size="xl"
-                    className="w-full h-14 rounded-xl text-lg font-bold"
+                    className="w-full h-14 rounded-xl text-lg font-bold text-[#0F1111] bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] shadow-lg shadow-amber-300/40 hover:shadow-xl hover:shadow-amber-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
                     onClick={handlePayNow}
                     disabled={loading}
                   >
