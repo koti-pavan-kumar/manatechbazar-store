@@ -6,6 +6,8 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ProductCard } from "@/components/product/product-card";
+import { InstagramReels } from "@/components/instagram-reels";
+import { Instagram } from "@/components/ui/icon-instagram";
 import { formatPrice, safeJsonParse } from "@/lib/utils";
 import { ArrowRight, Clock, Flame, Zap, Star, ChevronLeft, ChevronRight, ShoppingBag } from "lucide-react";
 
@@ -237,10 +239,29 @@ export function HomeContent({ data }: { data: HomeData }) {
         </section>
       </RevealSection>
 
-      {/* ═══════════ INSTAGRAM CTA ═══════════ */}
+      {/* ═══════════ INSTAGRAM REELS + CTA ═══════════ */}
       <RevealSection>
         <section className="mx-auto max-w-7xl px-4 py-8 sm:py-12">
-          <div className="bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 rounded-3xl p-8 sm:p-12 text-center text-white">
+          <div className="flex items-end justify-between gap-4 mb-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold">Latest on Instagram</h2>
+              <p className="text-muted-foreground text-sm mt-1">
+                Reels from @manatechbazar — tap the 🔊 on any reel to hear it
+              </p>
+            </div>
+            <a
+              href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw=="
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden sm:inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-pink-600 hover:text-pink-700 transition-colors"
+            >
+              <Instagram className="h-4 w-4" /> Follow @manatechbazar
+            </a>
+          </div>
+
+          <InstagramReels />
+
+          <div className="mt-6 bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 rounded-3xl p-8 sm:p-12 text-center text-white">
             <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Follow Us on Instagram</h2>
             <p className="text-white/80 mb-6 max-w-md mx-auto">Get exclusive deals, new arrivals & behind-the-scenes content!</p>
             <a href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==" target="_blank" rel="noopener noreferrer">
