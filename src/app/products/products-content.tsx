@@ -94,7 +94,7 @@ export function ProductsContent({ data, searchParams }: Props) {
                 <Search className="absolute left-4 h-5 w-5 text-gray-400" />
                 <Input
                   type="search"
-                  placeholder="Search for t-shirts, hoodies, watches..."
+                  placeholder="Search for gadgets, jewellery, toys..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-12 pr-4 h-14 rounded-2xl border-0 bg-transparent text-gray-900 placeholder:text-gray-400 focus:ring-0 focus-visible:ring-0"

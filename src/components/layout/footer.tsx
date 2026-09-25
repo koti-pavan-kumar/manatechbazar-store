@@ -13,7 +13,7 @@ export function Footer() {
               Mana Tech Bazar
             </Link>
             <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-              Your favourite store on Instagram. Trending fashion, accessories & lifestyle — delivered to your doorstep.
+              Your favourite store on Instagram. Gadgets, home &amp; kitchen, jewellery and toys — delivered to your doorstep, free above ₹499.
             </p>
             <a
               href="https://www.instagram.com/manatechbazar?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw=="
@@ -30,8 +30,10 @@ export function Footer() {
             <h3 className="font-bold text-sm mb-3">Shop</h3>
             <ul className="space-y-2">
               <li><Link href="/products" className="text-sm text-muted-foreground hover:text-foreground transition-colors">All Products</Link></li>
-              <li><Link href="/category/t-shirts" className="text-sm text-muted-foreground hover:text-foreground transition-colors">T-Shirts</Link></li>
-              <li><Link href="/category/hoodies" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Hoodies</Link></li>
+              <li><Link href="/category/gadgets" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Gadgets</Link></li>
+              <li><Link href="/category/home-kitchen" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Home &amp; Kitchen</Link></li>
+              <li><Link href="/category/jewellery" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Jewellery</Link></li>
+              <li><Link href="/category/toys-games" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Toys &amp; Games</Link></li>
               <li><Link href="/offers" className="text-sm text-orange-600 font-medium hover:text-orange-700 transition-colors">🔥 Offers</Link></li>
             </ul>
           </div>
@@ -76,8 +78,8 @@ export function Footer() {
             <span className="inline-flex items-center gap-1 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 px-2.5 py-1 rounded-full font-medium">
               💳 Cards
             </span>
-            <span className="inline-flex items-center gap-1 bg-orange-50 dark:bg-orange-950/30 text-orange-700 dark:text-orange-400 px-2.5 py-1 rounded-full font-medium">
-              📦 COD
+            <span className="inline-flex items-center gap-1 bg-yellow-50 dark:bg-yellow-950/30 text-yellow-700 dark:text-yellow-400 px-2.5 py-1 rounded-full font-medium">
+              🔒 100% Secure Pay
             </span>
             <span className="inline-flex items-center gap-1 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-full font-medium">
               🏦 Netbanking

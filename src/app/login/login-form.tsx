@@ -121,7 +121,7 @@ export function LoginForm() {
               <br />on Trending Products
             </h1>
             <p className="text-lg text-white/60 max-w-md mb-10">
-              Curated fashion, accessories & lifestyle — delivered to your doorstep with free shipping above ₹499.
+              Gadgets, home & kitchen, jewellery and toys — delivered to your doorstep with free shipping above ₹499.
             </p>
 
             {/* Stats */}

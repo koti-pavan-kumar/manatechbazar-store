@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     template: "%s | Mana Tech Bazar",
   },
   description: "Discover amazing products at the best prices. Shop now on Instagram's favourite store!",
-  keywords: ["online store", "shopping", "deals", "fashion", "accessories", "manatechbazar"],
+  keywords: ["online store", "shopping", "deals", "gadgets", "home & kitchen", "jewellery", "toys", "manatechbazar"],
   openGraph: {
     type: "website",
     locale: "en_IN",
