@@ -307,15 +307,21 @@ export function ProductDetailContent({ product, related }: Props) {
           </div>
 
           {/* Price */}
-          <div className="flex items-baseline gap-3">
+          <div className="flex items-baseline gap-3 flex-wrap">
             <span className="text-3xl font-bold">{formatPrice(currentPrice)}</span>
             {discount > 0 && (
               <>
+                <span className="text-sm text-muted-foreground">Market price</span>
                 <span className="text-lg text-muted-foreground line-through">{formatPrice(product.mrp)}</span>
                 <Badge className="bg-green-100 text-green-800 border-0">{discount}% OFF</Badge>
               </>
             )}
           </div>
+          {discount > 0 && (
+            <p className="text-xs text-muted-foreground">
+              Market price is the prevailing online / retail price for this item, shown for comparison. You pay {formatPrice(currentPrice)}.
+            </p>
+          )}
 
           {/* Stock */}
           {currentStock > 0 ? (
@@ -586,8 +592,7 @@ export function ProductDetailContent({ product, related }: Props) {
             <DialogTitle>Quick Edit Price & Stock</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <Label>MRP (₹)</Label>
+            <div>                  <Label>Market price (₹)</Label>
               <Input type="number" value={newMrp} onChange={(e) => setNewMrp(e.target.value)} />
             </div>
             <div>

@@ -231,7 +231,7 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-base font-bold text-foreground">{formatPrice(product.price)}</span>
           {discount > 0 && (
-            <span className="text-sm text-muted-foreground line-through">
+            <span className="text-sm text-muted-foreground line-through" title="Market price">
               {formatPrice(product.mrp)}
             </span>
           )}

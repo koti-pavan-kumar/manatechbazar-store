@@ -27,7 +27,6 @@ export default function RefundPolicyPage() {
             <ul className="space-y-2 text-muted-foreground">
               <li>You may cancel your order within <strong>1 hour</strong> of placing it by contacting us via WhatsApp or email.</li>
               <li>Orders that have already been shipped cannot be cancelled. You may refuse delivery or initiate a return after receiving the product.</li>
-              <li>COD (Cash on Delivery) orders can be cancelled before dispatch without any charges.</li>
               <li>Prepaid orders (UPI/Cards) cancelled before dispatch will receive a <strong>full refund</strong> to the original payment method within 5-7 business days.</li>
             </ul>
           </section>
@@ -46,7 +45,6 @@ export default function RefundPolicyPage() {
             <h2 className="text-xl font-bold mb-3">3. Refunds</h2>
             <ul className="space-y-2 text-muted-foreground">
               <li><strong>Prepaid orders:</strong> Refund will be credited to your original payment method (UPI/Card/Netbanking) within <strong>5-7 business days</strong> after we receive and inspect the returned product.</li>
-              <li><strong>COD orders:</strong> Refund will be processed via UPI transfer or bank transfer within <strong>7-10 business days</strong>. You will need to provide your UPI ID or bank details.</li>
               <li><strong>Partial refunds</strong> may be issued if the product shows signs of use, damage, or missing tags/packaging.</li>
               <li>Shipping charges are non-refundable unless the return is due to our error (wrong product, defective item).</li>
             </ul>

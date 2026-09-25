@@ -176,7 +176,7 @@ export function ProductForm({ product, categories, mode }: Props) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label>MRP (₹) *</Label>
+                  <Label>Market price (₹) *</Label>
                   <Input type="number" step="0.01" {...register("mrp")} />
                   {errors.mrp && <p className="text-xs text-red-500 mt-1">{errors.mrp.message}</p>}
                 </div>
@@ -329,7 +329,7 @@ export function ProductForm({ product, categories, mode }: Props) {
               <ul className="mt-1 text-xs text-red-500 space-y-0.5">
                 {errors.title && <li>• Title is required</li>}
                 {errors.description && <li>• Description must be at least 10 characters</li>}
-                {errors.mrp && <li>• MRP must be greater than 0</li>}
+                {errors.mrp && <li>• Market price must be greater than 0</li>}
                 {errors.price && <li>• {errors.price.message}</li>}
                 {errors.stock && <li>• Stock cannot be negative</li>}
                 {errors.images && <li>• Upload at least one image</li>}

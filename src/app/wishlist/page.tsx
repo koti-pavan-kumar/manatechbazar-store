@@ -158,7 +158,7 @@ export default function WishlistPage() {
             <div className="flex items-center gap-4 animate-slide-in-left">
               <div className="bg-white/15 backdrop-blur-sm rounded-2xl px-5 py-3 text-center">
                 <p className="text-xs text-white/70 uppercase tracking-wider font-medium">Total Savings</p>
-                <p className="text-xs text-white/50 line-through mb-0.5">{formatPrice(items.reduce((sum, item) => sum + item.mrp, 0))} MRP</p>
+                <p className="text-xs text-white/50 line-through mb-0.5">{formatPrice(items.reduce((sum, item) => sum + item.mrp, 0))} market price</p>
                 <p className="text-2xl font-extrabold text-green-300">-{formatPrice(totalSaved)}</p>
                 <p className="text-[10px] text-white/60 mt-0.5">You&apos;re saving on {items.length} item{items.length !== 1 ? 's' : ''}!</p>
               </div>
@@ -259,7 +259,7 @@ export default function WishlistPage() {
             <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 rounded-3xl bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 border border-pink-100 dark:border-pink-900/30">
               <div>
                 <p className="font-bold text-lg">Ready to shop?</p>
-                <p className="text-sm text-muted-foreground">Move your favourites to cart and check out with UPI or COD</p>
+                <p className="text-sm text-muted-foreground">Move your favourites to cart and check out securely with UPI, cards or netbanking</p>
               </div>
               <Link href="/cart">
                 <Button className="h-11 px-6 rounded-xl font-semibold bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-lg shadow-pink-500/20">

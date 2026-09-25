@@ -36,7 +36,7 @@ export default function TermsPage() {
               <li>Prices are in Indian Rupees (₹) and include all applicable taxes unless stated otherwise.</li>
               <li>We reserve the right to modify prices without prior notice. However, price changes will not affect orders already confirmed.</li>
               <li>Product images are for illustration purposes. Actual product colour, texture, and size may vary slightly.</li>
-              <li>MRP (Maximum Retail Price) shown is the manufacturer's suggested retail price. Our selling price may be lower.</li>
+              <li>Where a struck-through <strong>market price</strong> is shown next to our price, it is a reference price shown for comparison — the prevailing online / retail price for that item. The price you pay is always our selling price, which is the amount charged on your order and invoice.</li>
             </ul>
           </section>
 
@@ -44,9 +44,9 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold mb-3">3. Orders & Payment</h2>
             <ul className="space-y-2 text-muted-foreground">
               <li>Placing an order does not guarantee acceptance. We reserve the right to refuse or cancel any order for any reason.</li>
-              <li>Accepted payment methods: UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Netbanking, Wallets, and Cash on Delivery (COD).</li>
+              <li>Accepted payment methods: UPI (Google Pay, PhonePe, Paytm), Credit/Debit Cards, Netbanking and Wallets — all payments are processed securely through Razorpay.</li>
               <li>All online payments are processed securely through Razorpay. We do not store your card or banking details.</li>
-              <li>Orders are confirmed only after successful payment (for prepaid) or manual verification (for COD).</li>
+              <li>Orders are confirmed only after successful payment via Razorpay.</li>
             </ul>
           </section>
 

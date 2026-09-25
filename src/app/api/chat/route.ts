@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       ? products.map((p) => {
           const images = safeJsonParse(p.images, []);
           const cats = p.categoryProducts.map((cp) => cp.category.name).join(", ");
-          return `- ${p.title} (${cats}): MRP ${formatPrice(p.mrp)}, Price ${formatPrice(p.price)}, ${p.discountPercent}% off, Stock: ${p.stock}, ID: ${p.id}`;
+          return `- ${p.title} (${cats}): Market price ${formatPrice(p.mrp)}, Price ${formatPrice(p.price)}, ${p.discountPercent}% off, Stock: ${p.stock}, ID: ${p.id}`;
         }).join("\n")
       : "No products found matching the query.";
 
@@ -62,7 +62,7 @@ RULES:
 - If a product is out of stock, suggest similar alternatives from the catalog.
 - Keep responses concise (2-4 sentences max).
 - If asked about shipping: Free delivery above ₹499, otherwise ₹49 shipping.
-- Payment methods: UPI, Cards, Net Banking, Wallets (via Razorpay), or Cash on Delivery.
+- Payment methods: UPI, Cards, Net Banking and Wallets (via Razorpay). We do not offer Cash on Delivery.
 - Direct customers to buy through the website checkout, not through WhatsApp.
 
 CATALOG DATA:

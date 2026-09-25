@@ -295,7 +295,7 @@ export default function CheckoutPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {/* Full product cards — image, variant, qty, price, MRP, discount */}
+              {/* Full product cards — image, variant, qty, price, market price, discount */}
               <div className="space-y-2.5">
                 {items.map((item, i) => {
                   const lineTotal = item.price * item.quantity;
@@ -338,7 +338,7 @@ export default function CheckoutPage() {
                           <span>{formatPrice(item.price)} each</span>
                           {item.mrp > item.price && (
                             <>
-                              <span className="line-through">{formatPrice(item.mrp)}</span>
+                              <span className="line-through" title="Market price">{formatPrice(item.mrp)}</span>
                               <span className="font-bold text-green-700 bg-green-100 rounded-full px-1.5 py-0.5">
                                 {discountPct}% OFF
                               </span>
@@ -378,7 +378,7 @@ export default function CheckoutPage() {
                 )}
                 {items.reduce((n, i) => n + Math.max(0, i.mrp - i.price) * i.quantity, 0) > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Total savings vs MRP</span>
+                    <span>Total savings vs market price</span>
                     <span>{formatPrice(items.reduce((n, i) => n + Math.max(0, i.mrp - i.price) * i.quantity, 0))}</span>
                   </div>
                 )}

@@ -148,7 +148,7 @@ export default function CartPage() {
                 <div className="flex items-center gap-2 mt-1">
                   <span className="font-bold">{formatPrice(item.price)}</span>
                   {item.mrp > item.price && (
-                    <span className="text-xs text-muted-foreground line-through">{formatPrice(item.mrp)}</span>
+                    <span className="text-xs text-muted-foreground line-through" title="Market price">{formatPrice(item.mrp)}</span>
                   )}
                 </div>
                 <div className="flex items-center justify-between mt-3">

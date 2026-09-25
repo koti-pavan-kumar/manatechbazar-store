@@ -22,7 +22,7 @@ export const productSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z.string().optional(),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  mrp: z.coerce.number().min(1, "MRP must be greater than 0"),
+  mrp: z.coerce.number().min(1, "Market price must be greater than 0"),
   price: z.coerce.number().min(1, "Price must be greater than 0"),
   stock: z.coerce.number().min(0, "Stock cannot be negative"),
   sku: z.string().optional(),
@@ -43,7 +43,7 @@ export const productSchema = z.object({
     image: z.string().optional(),
   })).optional(),
 }).refine((data) => data.price <= data.mrp, {
-  message: "Selling price must be less than or equal to MRP",
+  message: "Selling price must be less than or equal to the market price",
   path: ["price"],
 });
 

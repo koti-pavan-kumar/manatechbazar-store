@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Prices must be positive numbers" }, { status: 400 });
     }
     if (priceNum > mrpNum) {
-      return NextResponse.json({ error: "Selling price cannot be higher than MRP" }, { status: 400 });
+      return NextResponse.json({ error: "Selling price cannot be higher than the market price" }, { status: 400 });
     }
     if (!Number.isInteger(stockNum) || stockNum < 0) {
       return NextResponse.json({ error: "Stock must be a whole number" }, { status: 400 });
@@ -118,7 +118,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: "Prices must be positive numbers" }, { status: 400 });
     }
     if (priceNum > mrpNum) {
-      return NextResponse.json({ error: "Selling price cannot be higher than MRP" }, { status: 400 });
+      return NextResponse.json({ error: "Selling price cannot be higher than the market price" }, { status: 400 });
     }
     if (!Number.isInteger(stockNum) || stockNum < 0) {
       return NextResponse.json({ error: "Stock must be a whole number" }, { status: 400 });
