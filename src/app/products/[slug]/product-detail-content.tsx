@@ -84,6 +84,8 @@ export function ProductDetailContent({ product, related }: Props) {
       image: images[0] || "",
       stock: currentStock,
       freeShipping: product.freeShipping,
+      deliveryCharge: product.deliveryCharge,
+      codAvailable: product.codAvailable,
       variantId: selectedVariant?.id,
       variantLabel: selectedVariant
         ? [selectedVariant.size, selectedVariant.color].filter(Boolean).join(" / ")
@@ -509,13 +511,21 @@ export function ProductDetailContent({ product, related }: Props) {
             </p>
           </div>
 
-          {/* Free Shipping Badge */}
-          {product.freeShipping && (
+          {/* Delivery badge — free vs charged */}
+          {product.freeShipping ? (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800">
               <Truck className="h-5 w-5 text-green-600" />
               <div>
                 <p className="text-xs font-bold text-green-700 dark:text-green-400">🚚 FREE Delivery on this product!</p>
                 <p className="text-[10px] text-green-600 dark:text-green-500">No shipping charges</p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border">
+              <Truck className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <p className="text-xs font-bold">🚚 Delivery {formatPrice(product.deliveryCharge ?? 4900)}</p>
+                <p className="text-[10px] text-muted-foreground">FREE on orders above ₹499</p>
               </div>
             </div>
           )}
@@ -526,7 +536,9 @@ export function ProductDetailContent({ product, related }: Props) {
               <Truck className="h-5 w-5 text-green-600 shrink-0" />
               <div className="min-w-0">
                 <p className="text-xs font-medium truncate">{product.freeShipping ? "Free Delivery" : "Delivery"}</p>
-                <p className="text-[10px] text-muted-foreground truncate">{product.freeShipping ? "Included" : "Above ₹499"}</p>
+                <p className="text-[10px] text-muted-foreground truncate">
+                  {product.freeShipping ? "Included" : `${formatPrice(product.deliveryCharge ?? 4900)} · Free ₹499+`}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-lg bg-muted/50 min-w-0 overflow-hidden">

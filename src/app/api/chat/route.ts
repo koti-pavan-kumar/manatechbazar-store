@@ -61,7 +61,7 @@ RULES:
 - When mentioning prices, use ₹ symbol.
 - If a product is out of stock, suggest similar alternatives from the catalog.
 - Keep responses concise (2-4 sentences max).
-- If asked about shipping: Free delivery above ₹499, otherwise ₹49 shipping.
+- If asked about shipping: Free delivery above ₹499; below that a per-product delivery charge applies (₹49 for most items).
 - Payment methods: UPI, Cards, Net Banking and Wallets (via Razorpay). We do not offer Cash on Delivery.
 - Direct customers to buy through the website checkout, not through WhatsApp.
 

@@ -43,6 +43,8 @@ export function ProductForm({ product, categories, mode }: Props) {
       isActive: product?.isActive ?? true,              isFeatured: product?.isFeatured ?? false,
               isDealOfTheDay: product?.isDealOfTheDay ?? false,
               freeShipping: product?.freeShipping ?? false,
+      deliveryCharge: product?.deliveryCharge != null ? product.deliveryCharge / 100 : 49,
+      codAvailable: product?.codAvailable ?? true,
       categoryIds: selectedCategoryIds,
       tags: product?.tags ? (typeof product.tags === "string" ? safeJsonParse(product.tags, []).join(", ") : product.tags.join(", ")) : "",
       images: images,
@@ -299,11 +301,11 @@ export function ProductForm({ product, categories, mode }: Props) {
                 />
                 <span className="text-sm">Deal of the Day</span>
               </label>
-              <div className="border-t pt-3 mt-2">
+              <div className="border-t pt-3 mt-2 space-y-3">
                 <label className="flex items-center justify-between min-h-[44px]">
                   <div>
                     <span className="text-sm font-medium">🚚 Free Shipping</span>
-                    <p className="text-[11px] text-muted-foreground">Skip the ₹49 shipping fee for this product</p>
+                    <p className="text-[11px] text-muted-foreground">Customer pays no delivery charge for this product</p>
                   </div>
                   <button
                     type="button"
@@ -315,6 +317,37 @@ export function ProductForm({ product, categories, mode }: Props) {
                     <span
                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                         watch("freeShipping") ? "translate-x-6" : "translate-x-1"
+                      }`}
+                    />
+                  </button>
+                </label>
+
+                {!watch("freeShipping") && (
+                  <div>
+                    <Label htmlFor="deliveryCharge">Delivery Charge (₹) *</Label>
+                    <Input id="deliveryCharge" type="number" min={0} step="1" {...register("deliveryCharge")} placeholder="49" />
+                    <p className="text-[11px] text-muted-foreground mt-1">
+                      Charged once per order (highest charge in the cart). Waived automatically for carts of ₹499+.
+                    </p>
+                    {errors.deliveryCharge && <p className="text-xs text-red-500 mt-1">{errors.deliveryCharge.message}</p>}
+                  </div>
+                )}
+
+                <label className="flex items-center justify-between min-h-[44px] border-t pt-3">
+                  <div>
+                    <span className="text-sm font-medium">💵 Cash on Delivery</span>
+                    <p className="text-[11px] text-muted-foreground">Customer can pay cash when the order arrives</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setValue("codAvailable", !watch("codAvailable"))}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      watch("codAvailable") ? "bg-green-500" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        watch("codAvailable") ? "translate-x-6" : "translate-x-1"
                       }`}
                     />
                   </button>

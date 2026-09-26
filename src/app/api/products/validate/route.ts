@@ -44,6 +44,8 @@ export async function POST(req: NextRequest) {
         stock: true,
         images: true,
         freeShipping: true,
+        deliveryCharge: true,
+        codAvailable: true,
       },
     });
 
@@ -58,6 +60,8 @@ export async function POST(req: NextRequest) {
         stock: number;
         image: string;
         freeShipping: boolean;
+        deliveryCharge: number;
+        codAvailable: boolean;
       }
     > = {};
 
@@ -72,6 +76,8 @@ export async function POST(req: NextRequest) {
         stock: p.stock,
         image: images[0] || "",
         freeShipping: p.freeShipping,
+        deliveryCharge: p.deliveryCharge,
+        codAvailable: p.codAvailable,
       };
     }
 

@@ -27,6 +27,8 @@ interface ProductCardProps {
     stock: number;
     isActive: boolean;
     freeShipping?: boolean;
+    deliveryCharge?: number;
+    codAvailable?: boolean;
   };
   priority?: boolean;
 }
@@ -82,6 +84,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       image: imageUrl,
       stock: product.stock,
       freeShipping: product.freeShipping,
+      deliveryCharge: product.deliveryCharge,
+      codAvailable: product.codAvailable,
     });
     router.push("/checkout");
   };
@@ -99,6 +103,8 @@ export function ProductCard({ product, priority = false }: ProductCardProps) {
       image: imageUrl,
       stock: product.stock,
       freeShipping: product.freeShipping,
+      deliveryCharge: product.deliveryCharge,
+      codAvailable: product.codAvailable,
     });
     showToast(`${product.title} added to cart!`);
     setTimeout(() => setAddedToCart(false), 2000);

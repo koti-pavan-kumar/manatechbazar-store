@@ -10,6 +10,7 @@ import { formatPrice } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 import { useState } from "react";
 import { STORE } from "@/lib/constants";
+import { computeShipping } from "@/lib/shipping";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, couponCode, discount, applyCoupon, removeCoupon, getSubtotal } = useCartStore();
@@ -18,8 +19,7 @@ export default function CartPage() {
   const [couponLoading, setCouponLoading] = useState(false);
 
   const subtotal = getSubtotal();
-  const hasFreeShippingItem = items.some((item) => item.freeShipping);
-  const shipping = hasFreeShippingItem || subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
+  const shipping = computeShipping(subtotal, items);
   const total = Math.max(0, subtotal - discount + shipping);
   const freeShippingProgress = Math.min(100, (subtotal / (STORE.minOrderForFreeShipping * 100)) * 100);
   const amountForFreeShipping = Math.max(0, STORE.minOrderForFreeShipping * 100 - subtotal);
@@ -85,18 +85,25 @@ export default function CartPage() {
       </div>
 
       {/* Free Shipping Progress */}
-      {hasFreeShippingItem ? (
+      {amountForFreeShipping === 0 ? (
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+            <Truck className="h-4 w-4 text-green-600" />
+          </div>
+          <p className="text-green-700 font-semibold text-sm">🎉 You&apos;ve unlocked FREE delivery!</p>
+        </div>
+      ) : shipping === 0 ? (
         <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
               <Truck className="h-4 w-4 text-green-600" />
             </div>
             <span className="text-sm font-semibold text-green-800">
-              🚚 FREE delivery on this order! (Free shipping product in cart)
+              🚚 FREE delivery on this order!
             </span>
           </div>
         </div>
-      ) : amountForFreeShipping > 0 ? (
+      ) : (
         <div className="mb-6 p-5 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
@@ -110,13 +117,6 @@ export default function CartPage() {
             <Progress value={freeShippingProgress} className="h-2.5 bg-green-100 flex-1" />
             <span className="text-sm font-bold text-green-600">{Math.round(freeShippingProgress)}%</span>
           </div>
-        </div>
-      ) : (
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-green-50 to-emerald-50 border border-green-100 flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
-            <Truck className="h-4 w-4 text-green-600" />
-          </div>
-          <p className="text-green-700 font-semibold text-sm">🎉 You&apos;ve unlocked FREE delivery!</p>
         </div>
       )}
 

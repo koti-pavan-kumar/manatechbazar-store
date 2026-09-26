@@ -104,6 +104,8 @@ model Product {
   isFeatured      Boolean   @default(false)
   isDealOfTheDay  Boolean   @default(false)
   freeShipping    Boolean   @default(false)
+  deliveryCharge  Int       @default(4900) // paise — charged per order when freeShipping = false
+  codAvailable    Boolean   @default(true)  // customer may choose Cash on Delivery for this product
   weight          Float?
   tags            String    @default("[]")   // JSON array stored as string for SQLite
   images          String    @default("[]")   // JSON array stored as string for SQLite
@@ -147,7 +149,7 @@ model Order {
   addressId          String
   orderNumber        String      @unique
   status             String      @default("PLACED")   // PLACED|CONFIRMED|SHIPPED|DELIVERED|CANCELLED|RETURNED
-  paymentMode        String                               // RAZORPAY
+  paymentMode        String                               // RAZORPAY | COD
   paymentStatus      String      @default("PENDING")     // PENDING|PAID|FAILED|REFUNDED
   razorpayOrderId    String?
   razorpayPaymentId  String?

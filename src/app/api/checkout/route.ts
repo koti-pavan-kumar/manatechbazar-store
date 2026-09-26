@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
+import { computeShipping } from "@/lib/shipping";
 import Razorpay from "razorpay";
 import { rateLimit, getClientIp, rateLimitResponse } from "@/lib/rate-limit";
 
@@ -32,7 +33,11 @@ export async function POST(req: NextRequest) {
       // Cart items from client
       items: cartItems,
       couponCode,
+      // Payment mode: "RAZORPAY" (default) or "COD"
+      paymentMode: requestedPaymentMode,
     } = await req.json();
+
+    const paymentMode = requestedPaymentMode === "COD" ? "COD" : "RAZORPAY";
 
     // Validate required fields
     if (!guestName || !guestPhone) {
@@ -111,16 +116,25 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // COD is allowed only when every product in the cart permits it
+    if (paymentMode === "COD") {
+      const codBlocked = liveProducts.find((p) => !p.codAvailable);
+      if (codBlocked) {
+        return NextResponse.json(
+          { error: `Cash on Delivery is not available for "${codBlocked.title}". Please choose online payment.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Calculate totals server-side from DB prices
     let subtotal = 0;
-    let hasFreeShipping = false;
     const processedItems = cartItems.map((item: any) => {
       const product = liveById.get(item.id)!;
       const price = product.price;
       const itemTotal = price * item.quantity;
       const itemDiscount = (product.mrp - price) * item.quantity;
       subtotal += itemTotal;
-      if (product.freeShipping) hasFreeShipping = true;
       const images = (() => {
         try { return JSON.parse(product.images || "[]"); } catch { return []; }
       })();
@@ -158,10 +172,64 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const shipping = hasFreeShipping || subtotal >= 49900 ? 0 : 4900;
+    const shipping = computeShipping(
+      subtotal,
+      liveProducts.map((p) => ({ freeShipping: p.freeShipping, deliveryCharge: p.deliveryCharge }))
+    );
     const total = Math.max(1, subtotal - couponDiscount + shipping);
 
     const orderNumber = generateOrderNumber();
+
+    // ── COD: no gateway — place the order now and lock in stock ───────
+    if (paymentMode === "COD") {
+      try {
+        const codOrder = await db.$transaction(async (tx) => {
+          for (const item of processedItems) {
+            const res = await tx.product.updateMany({
+              where: { id: item.productId, stock: { gte: item.quantity } },
+              data: { stock: { decrement: item.quantity } },
+            });
+            if (res.count === 0) {
+              throw new Error(`"${item.title}" just went out of stock — please update your cart and try again`);
+            }
+          }
+          return tx.order.create({
+            data: {
+              orderNumber,
+              status: "PLACED",
+              paymentMode: "COD",
+              paymentStatus: "PENDING",
+              addressId: address.id,
+              subtotal,
+              discount: couponDiscount,
+              shippingCharges: shipping,
+              total,
+              couponCode: couponCode || null,
+              // Guest info
+              guestName,
+              guestPhone,
+              guestEmail: guestEmail || null,
+              items: {
+                create: processedItems,
+              },
+            },
+          });
+        });
+
+        return NextResponse.json({
+          success: true,
+          cod: true,
+          internalOrderId: codOrder.id,
+          orderNumber: codOrder.orderNumber,
+          amount: total,
+        });
+      } catch (e: any) {
+        if (typeof e?.message === "string" && e.message.includes("out of stock")) {
+          return NextResponse.json({ error: e.message }, { status: 400 });
+        }
+        throw e;
+      }
+    }
 
     // Create Razorpay order ONLY — no internal order yet
     const razorpayOrder = await razorpay.orders.create({

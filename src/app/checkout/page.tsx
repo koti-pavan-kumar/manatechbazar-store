@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useCartStore } from "@/stores/cart";
 import { formatPrice } from "@/lib/utils";
 import { STORE } from "@/lib/constants";
-import { CreditCard, Loader2, Check, MapPin, User, Phone, Minus, Plus, Trash2 } from "lucide-react";
+import { computeShipping } from "@/lib/shipping";
+import { CreditCard, Loader2, Check, MapPin, User, Phone, Minus, Plus, Trash2, Banknote, Truck } from "lucide-react";
 
 declare global {
   interface Window {
@@ -38,6 +39,7 @@ export default function CheckoutPage() {
   const { items, getSubtotal, couponCode, discount, clearCart, updateQuantity, removeItem } = useCartStore();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<"billing" | "payment">("billing");
+  const [paymentMethod, setPaymentMethod] = useState<"ONLINE" | "COD">("ONLINE");
 
   const { register, handleSubmit, formState: { errors }, watch } = useForm({
     defaultValues: {
@@ -53,9 +55,10 @@ export default function CheckoutPage() {
   });
 
   const subtotal = getSubtotal();
-  const hasFreeShippingItem = items.some((item) => item.freeShipping);
-  const shipping = hasFreeShippingItem || subtotal >= STORE.minOrderForFreeShipping * 100 ? 0 : 4900;
+  const shipping = computeShipping(subtotal, items);
   const total = Math.max(0, subtotal - discount + shipping);
+  // Cash on Delivery is offered only when every product in the cart allows it
+  const codEligible = items.every((item) => item.codAvailable !== false);
 
   if (items.length === 0) {
     return (
@@ -75,7 +78,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const handlePayNow = async () => {
+  const handlePlaceOrder = async () => {
     setLoading(true);
     try {
       const billingData = watch();
@@ -84,6 +87,7 @@ export default function CheckoutPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          paymentMode: paymentMethod === "COD" ? "COD" : "RAZORPAY",
           guestName: billingData.name,
           guestPhone: billingData.phone,
           guestEmail: billingData.email || null,
@@ -113,6 +117,13 @@ export default function CheckoutPage() {
       if (!data.success) {
         alert(data.error || "Failed to create order");
         setLoading(false);
+        return;
+      }
+
+      // Cash on Delivery — the order is already placed, no gateway needed
+      if (data.cod) {
+        clearCart();
+        router.push(`/orders/${data.internalOrderId}`);
         return;
       }
 
@@ -428,21 +439,69 @@ export default function CheckoutPage() {
 
               {step === "payment" && (
                 <div className="pt-4 space-y-3">
-                  <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3 text-sm text-blue-700 dark:text-blue-300">
-                    💳 Payment via Razorpay — UPI, Cards, Net Banking, Wallets
+                  <p className="text-sm font-semibold">Payment Method</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod("ONLINE")}
+                      className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
+                        paymentMethod === "ONLINE"
+                          ? "border-primary bg-primary/5"
+                          : "border-muted hover:border-muted-foreground/40"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 text-sm font-bold">
+                        <CreditCard className="h-4 w-4" /> Pay Online
+                      </span>
+                      <span className="text-[11px] text-muted-foreground">UPI, Cards, Net Banking, Wallets</span>
+                    </button>
+                    {codEligible && (
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod("COD")}
+                        className={`flex flex-col items-start gap-0.5 p-3 rounded-xl border-2 text-left transition-all ${
+                          paymentMethod === "COD"
+                            ? "border-primary bg-primary/5"
+                            : "border-muted hover:border-muted-foreground/40"
+                        }`}
+                      >
+                        <span className="flex items-center gap-2 text-sm font-bold">
+                          <Banknote className="h-4 w-4" /> Cash on Delivery
+                        </span>
+                        <span className="text-[11px] text-muted-foreground">Pay cash when your order arrives</span>
+                      </button>
+                    )}
                   </div>
+                  {!codEligible && (
+                    <p className="text-xs text-muted-foreground">
+                      Cash on Delivery isn&apos;t available for all items in your cart.
+                    </p>
+                  )}
+
+                  {paymentMethod === "COD" ? (
+                    <div className="bg-amber-50 dark:bg-amber-950/30 rounded-xl p-3 text-sm text-amber-800 dark:text-amber-300">
+                      📞 Pay {formatPrice(total)} in cash when your order arrives. Our team will confirm the order on
+                      WhatsApp before it ships.
+                    </div>
+                  ) : (
+                    <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3 text-sm text-blue-700 dark:text-blue-300">
+                      💳 Payment via Razorpay — UPI, Cards, Net Banking, Wallets
+                    </div>
+                  )}
                   <Button
                     size="xl"
                     className="w-full h-14 rounded-xl text-lg font-bold text-[#0F1111] bg-[#FFD814] hover:bg-[#F7CA00] border border-[#FCD200] shadow-lg shadow-amber-300/40 hover:shadow-xl hover:shadow-amber-300/50 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
-                    onClick={handlePayNow}
+                    onClick={handlePlaceOrder}
                     disabled={loading}
                   >
                     {loading ? (
                       <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    ) : paymentMethod === "COD" ? (
+                      <Truck className="h-5 w-5 mr-2" />
                     ) : (
                       <CreditCard className="h-5 w-5 mr-2" />
                     )}
-                    Pay {formatPrice(total)}
+                    {paymentMethod === "COD" ? `Place COD Order — ${formatPrice(total)}` : `Pay ${formatPrice(total)}`}
                   </Button>
                   <button
                     onClick={() => setStep("billing")}

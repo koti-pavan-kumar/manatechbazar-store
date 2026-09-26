@@ -60,6 +60,8 @@ export function CartSync() {
               image: fresh.image || i.image,
               stock,
               freeShipping: fresh.freeShipping,
+              deliveryCharge: fresh.deliveryCharge,
+              codAvailable: fresh.codAvailable,
               quantity: stock > 0 ? Math.min(i.quantity, stock) : i.quantity,
             };
           });
@@ -83,8 +85,12 @@ export function CartSync() {
         if (deadCart.length > 0 || nextCartItems.length !== c.items.length) {
           useCartStore.setState({ items: nextCartItems });
         } else if (
-          JSON.stringify(nextCartItems.map((i) => [i.id, i.price, i.stock, i.title])) !==
-          JSON.stringify(c.items.map((i) => [i.id, i.price, i.stock, i.title]))
+          JSON.stringify(
+            nextCartItems.map((i) => [i.id, i.price, i.stock, i.title, i.freeShipping, i.deliveryCharge, i.codAvailable])
+          ) !==
+          JSON.stringify(
+            c.items.map((i) => [i.id, i.price, i.stock, i.title, i.freeShipping, i.deliveryCharge, i.codAvailable])
+          )
         ) {
           useCartStore.setState({ items: nextCartItems });
         }

@@ -13,6 +13,8 @@ export interface CartProduct {
   image: string;
   stock: number;
   freeShipping?: boolean;
+  deliveryCharge?: number;
+  codAvailable?: boolean;
   variantId?: string;
   variantLabel?: string;
   quantity: number;

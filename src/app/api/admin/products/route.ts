@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, categoryIds, tags, images, variants } = body;
+    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, deliveryCharge, codAvailable, categoryIds, tags, images, variants } = body;
 
     if (!title || !description || !mrp || !price || !categoryIds?.length || !images?.length) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -45,6 +45,10 @@ export async function POST(req: NextRequest) {
     if (!Array.isArray(images) || !Array.isArray(categoryIds)) {
       return NextResponse.json({ error: "Invalid images or categories" }, { status: 400 });
     }
+    const deliveryChargeNum = deliveryCharge == null || deliveryCharge === "" ? 49 : Number(deliveryCharge);
+    if (!Number.isFinite(deliveryChargeNum) || deliveryChargeNum < 0 || deliveryChargeNum > 100000) {
+      return NextResponse.json({ error: "Delivery charge must be between ₹0 and ₹100000" }, { status: 400 });
+    }
 
     let slug = slugify(title);
     // Ensure unique slug
@@ -69,6 +73,8 @@ export async function POST(req: NextRequest) {
         isFeatured: isFeatured ?? false,
         isDealOfTheDay: isDealOfTheDay ?? false,
         freeShipping: freeShipping ?? false,
+        deliveryCharge: Math.round(deliveryChargeNum * 100), // convert to paise
+        codAvailable: codAvailable ?? true,
         images: JSON.stringify(images),
         tags: JSON.stringify(tags ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
         categoryProducts: {
@@ -105,7 +111,7 @@ export async function PUT(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Product ID required" }, { status: 400 });
 
     const body = await req.json();
-    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, categoryIds, tags, images } = body;
+    const { title, description, mrp, price, stock, sku, isActive, isFeatured, isDealOfTheDay, freeShipping, deliveryCharge, codAvailable, categoryIds, tags, images } = body;
 
     // Validate before writing — same rules as create
     if (typeof title !== "string" || title.trim().length < 1 || title.length > 200) {
@@ -122,6 +128,10 @@ export async function PUT(req: NextRequest) {
     }
     if (!Number.isInteger(stockNum) || stockNum < 0) {
       return NextResponse.json({ error: "Stock must be a whole number" }, { status: 400 });
+    }
+    const deliveryChargeNum = deliveryCharge == null || deliveryCharge === "" ? 49 : Number(deliveryCharge);
+    if (!Number.isFinite(deliveryChargeNum) || deliveryChargeNum < 0 || deliveryChargeNum > 100000) {
+      return NextResponse.json({ error: "Delivery charge must be between ₹0 and ₹100000" }, { status: 400 });
     }
 
     const discountPercent = mrp > price ? Math.round(((mrp - price) / mrp) * 100) : 0;
@@ -145,6 +155,8 @@ export async function PUT(req: NextRequest) {
         isFeatured: isFeatured ?? false,
         isDealOfTheDay: isDealOfTheDay ?? false,
         freeShipping: freeShipping ?? false,
+        deliveryCharge: Math.round(deliveryChargeNum * 100), // convert to paise
+        codAvailable: codAvailable ?? true,
         images: JSON.stringify(images),
         tags: JSON.stringify(tags ? tags.split(",").map((t: string) => t.trim()).filter(Boolean) : []),
         ...(categoryIds && {
