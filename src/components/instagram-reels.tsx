@@ -3,25 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX, Play, Pause } from "lucide-react";
 import { Instagram } from "@/components/ui/icon-instagram";
+import reelsData from "@/data/reels.json";
 
 /**
  * The store's 5 latest Instagram reels, hosted on the project's Cloudinary
  * account so they play natively (Instagram embeds can't be unmuted from
  * our own buttons — iframes are cross-origin).
  *
- * To swap in newer reels: upload the mp4 to Cloudinary (folder
- * manatechbazar/reels, unsigned preset "unsigned_mohan"), replace the id
- * and the Instagram shortcode below.
+ * The list lives in src/data/reels.json (newest first, oldest drops off).
+ * It is refreshed automatically by .github/workflows/sync-reels.yml, which
+ * pulls the latest reels from the official Instagram Graph API and re-hosts
+ * their videos on Cloudinary — no manual editing needed.
  */
 const CLOUD_BASE = "https://res.cloudinary.com/j8ly7tsg/video/upload";
 
-const REELS = [
-  { code: "DdrBqKxx87R", id: "manatechbazar/reels/slye6yixghrcylmquzwk" },
-  { code: "Ddn8jFNBN4X", id: "manatechbazar/reels/gtjak6qq6cmw0hhiqj5b" },
-  { code: "DdbeSBgOqgX", id: "manatechbazar/reels/wbt3yqdfoxnk0pfnx2r1" },
-  { code: "DdYz5yvSs8X", id: "manatechbazar/reels/blcpkjwtdbbjahtchnb1" },
-  { code: "DdONuIwsJOQ", id: "manatechbazar/reels/biihtjxapdgfoslbmiqr" },
-];
+const REELS: { code: string; id: string }[] = reelsData;
 
 export function InstagramReels() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
