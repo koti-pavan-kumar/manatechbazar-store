@@ -149,10 +149,10 @@ export function ProductForm({ product, categories, mode }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-3xl">
-      <div className="grid lg:grid-cols-3 gap-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid md:grid-cols-3 gap-6">
         {/* Main Form */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="md:col-span-2 space-y-6">
           <Card>
             <CardHeader><CardTitle>Product Details</CardTitle></CardHeader>
             <CardContent className="space-y-4">
