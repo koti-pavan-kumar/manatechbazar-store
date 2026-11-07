@@ -52,6 +52,3 @@ next-env.d.ts
 
 .vercel
 .env*
-
-# Instagram reels sync token cache (contains access token — never commit)
-.sync-cache.json

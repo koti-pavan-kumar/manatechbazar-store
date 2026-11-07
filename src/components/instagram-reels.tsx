@@ -10,10 +10,16 @@ import reelsData from "@/data/reels.json";
  * account so they play natively (Instagram embeds can't be unmuted from
  * our own buttons — iframes are cross-origin).
  *
- * The list lives in src/data/reels.json (newest first, oldest drops off).
- * It is refreshed automatically by .github/workflows/sync-reels.yml, which
- * pulls the latest reels from the official Instagram Graph API and re-hosts
- * their videos on Cloudinary — no manual editing needed.
+ * The list lives in src/data/reels.json (newest first, five entries max —
+ * the oldest drops off). It is maintained by hand:
+ *
+ *   1. Upload the reel's video to Cloudinary (folder manatechbazar/reels).
+ *   2. Add { "code": "<instagram shortcode>", "id": "manatechbazar/reels/<public_id>" }
+ *      to the top of src/data/reels.json.
+ *   3. Commit — the next deploy picks it up.
+ *
+ * There is intentionally no automatic sync: it needs a Meta app token that
+ * expires every 60 days, which is more maintenance than posting a reel.
  */
 const CLOUD_BASE = "https://res.cloudinary.com/j8ly7tsg/video/upload";
 
